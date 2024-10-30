@@ -10,9 +10,10 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    // "types": ["./src/types/custom.d.ts", "./node_modules/@types"],
+    "typeRoots": ["./@types", "./src/types", "./node_modules/@types"]
   },
-  // "include": ["src/**/*"],
-  "include": ["**/*.ts"],
+  "include": ["**/*.ts", "src/**/*"],
   "exclude": ["node_modules"]
 }

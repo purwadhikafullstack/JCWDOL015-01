@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,12 +7,255 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Sample {
-  id        Int      @id @default(autoincrement())
-  name      String
-  code      String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model User {
+  id                    Int       @id @default(autoincrement())
+  username              String
+  password              String
+  email                 String
+  name                  String
+  birth_date            DateTime
+  gender                String
+  education             String
+  address               String
+  profile_picture_url   String
+  is_verified           Boolean
+  subscription_type     SubscriptionType
+  subscription_end_date DateTime?
 
-  @@map("samples") // if you want to use snake_case format
+  analytics Analytics[]
+  applicant Applicant[]
+  application Application[]
+}
+
+model Admin {
+  id                    Int       @id @default(autoincrement())
+  username              String
+  password              String
+  email                 String
+  company_name          String
+  phone_number          String
+  company_description   String
+  company_logo_url      String
+  status                AdminStatus
+
+  test Test[]
+}
+
+model Developer {
+  id                    Int       @id @default(autoincrement())
+  username              String
+  password              String
+  email                 String
+}
+
+model Auth {
+  id               Int       @id @default(autoincrement())
+  user_id          Int?  
+  admin_id         Int?  
+  developer_id     Int?  
+  username         String
+  password         String
+  last_login       DateTime
+  login_attempts    Int
+}
+
+model Subscription {
+  id          Int       @id @default(autoincrement())
+  user_id     Int 
+  type        SubscriptionType
+  start_date  DateTime
+  end_date    DateTime
+}
+
+model Job {
+  id              Int       @id @default(autoincrement())
+  admin_id        Int   
+  title           String
+  description     String
+  location        String
+  salary          Float
+  tags            String?
+  expiry_date     DateTime
+  is_published    Boolean  @default(false)
+  requires_test   Boolean  @default(true) 
+  remote_option   Boolean  @default(false) 
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  applicant       Applicant[]
+  test            Test[]
+  application     Application[]
+}
+
+model Application {
+  id                Int       @id @default(autoincrement())
+  job_id            Int  
+  user_id          Int
+  status            ApplicationStatus
+  resume            Bytes
+  applied_at        DateTime @default(now())
+  cover_letter      String
+  expected_salary   Decimal @db.Decimal(10, 2)
+
+  job              Job      @relation(fields: [job_id], references: [id])
+  user             User     @relation(fields: [user_id], references: [id]) 
+
+  interview_schedule InterviewSchedule[]
+}
+
+model SkillAssessment {
+  id                Int       @id @default(autoincrement())
+  developer_id      Int?  
+  admin_id          Int?  
+  title             String
+  description       String
+  question_count    Int
+  difficulty_level   DifficultyLevel
+  is_active         Boolean
+}
+
+model InterviewSchedule {
+  id             Int       @id @default(autoincrement())
+  application_id  Int
+  date_time      DateTime
+  location       String
+  status         InterviewStatus
+
+  application    Application @relation(fields: [application_id], references: [id])
+}
+
+model Notifications {
+  id               Int       @id @default(autoincrement())
+  user_id          Int? 
+  admin_id         Int?
+  developer_id     Int? 
+  message          String
+  type             NotificationType
+  created_at       DateTime @default(now())
+  status           NotificationStatus
+}
+
+model PaymentHistory {
+  id               Int       @id @default(autoincrement())
+  user_id          Int
+  amount           Decimal @db.Decimal(10, 2)
+  payment_method   PaymentMethod
+  payment_date     DateTime @default(now())
+  transaction_id   Int
+  status           PaymentStatus
+}
+
+model Test {
+  id          Int       @id @default(autoincrement())
+  job_id      Int
+  created_by   Int  
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+  title       String   
+  test_file   String?  
+  questions   Question[]
+  results     Result[]
+  job         Job      @relation(fields: [job_id], references: [id])
+  admin       Admin    @relation(fields: [created_by], references: [id])
+}
+
+model Question {
+  id           Int       @id @default(autoincrement())
+  test_id      Int
+  question_text String 
+  choices      Choice[]
+  test         Test     @relation(fields: [test_id], references: [id])
+}
+
+model Choice {
+  id           Int       @id @default(autoincrement())
+  question_id   Int 
+  choice_text   String  
+  is_correct    Boolean  
+  question     Question @relation(fields: [question_id], references: [id])
+}
+
+model Result {
+  id          Int       @id @default(autoincrement())
+  test_id     Int
+  applicant_id Int 
+  score       Int
+  passed      Boolean    @default(false)
+  completed_at DateTime
+  test        Test       @relation(fields: [test_id], references: [id])
+  applicant    Applicant @relation(fields: [applicant_id], references: [id])
+}
+
+model Applicant {
+  id               Int       @id @default(autoincrement())
+  job_posting_id   Int 
+  user_id          Int 
+  applied_at        DateTime @default(now())
+  cv_url            String? 
+  job              Job      @relation(fields: [job_posting_id], references: [id])
+  user             User     @relation(fields: [user_id], references: [id])
+
+  result Result[]
+}
+
+model Analytics {
+  id               Int       @id @default(autoincrement())
+  user_id          Int 
+  age               Int
+  gender            String?
+  location          String?
+  salary_reported   Decimal? 
+  interests         String?
+  user              User      @relation(fields: [user_id], references: [id]) 
+}
+
+enum SubscriptionType {
+  standard
+  professional
+}
+
+enum AdminStatus {
+  active
+  inactive
+}
+
+enum DifficultyLevel {
+  easy
+  medium
+  hard
+}
+
+enum ApplicationStatus {
+  pending
+  accepted
+  rejected
+  under_review
+}
+
+enum InterviewStatus {
+  scheduled
+  completed
+  canceled
+}
+
+enum NotificationType {
+  email
+  alert
+  reminder
+}
+
+enum NotificationStatus {
+  sent
+  pending
+}
+
+enum PaymentMethod {
+  manual
+  gateway
+}
+
+enum PaymentStatus {
+  approved
+  pending
+  failed
 }
