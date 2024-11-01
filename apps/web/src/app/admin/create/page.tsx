@@ -1,85 +1,160 @@
-'use client';
+// "use client"
+// import QuestionInput from '@/components/Questions';
+// import { useState } from 'react';
 
-import { useState } from 'react';
 
-interface Question {
-    text: string;
-    options: string[];
-    correct: string;
-}
+// const TestCreationForm = () => {
+//   const [questions, setQuestions] = useState([{ question: '', options: ['', '', '', ''], answer: '' }]);
 
-export default function CreateTest() {
-    const [questions, setQuestions] = useState<Question[]>([]);
+//   const handleAddQuestion = () => {
+//     setQuestions([...questions, { question: '', options: ['', '', '', ''], answer: '' }]);
+//   };
 
-    const addQuestion = () => {
-        setQuestions([...questions, { text: '', options: ['', '', '', ''], correct: '' }]);
-    };
+//   const handleSubmit = async () => {
+//     // Save the test to the database
+//   };
 
-    const handleQuestionChange = (index: number, field: keyof Question, value: string, optionIndex?: number) => {
-        const updatedQuestions = [...questions];
-        if (field === 'text') {
-            updatedQuestions[index].text = value;
-        } else if (field === 'options' && optionIndex !== undefined) {
-            updatedQuestions[index].options[optionIndex] = value; // Update specific option
-        }
-        setQuestions(updatedQuestions);
-    };
+//   return (
+//     <div className="max-w-4xl mx-auto p-8 bg-gray-100 rounded-lg shadow-lg mt-10">
+//       <h1 className="text-4xl font-bold text-gray-800 mb-6 text-center">Create Pre-Selection Test</h1>
+//       <p className="text-lg text-gray-600 mb-10 text-center">
+//         Add 25 multiple-choice questions related to the job. Each question should have four options with one correct answer.
+//       </p>
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        console.log(questions);
-        alert('Test saved successfully!');
-    };
+//       <div className="space-y-8">
+//         {questions.map((question, index) => (
+//           <QuestionInput
+//             key={index}
+//             questionIndex={index}
+//             question={question}
+//             setQuestions={setQuestions}
+//             questions={questions}
+//           />
+//         ))}
+//       </div>
 
-    return (
-        <div className="container mx-auto p-4">
-            <h1 className="text-3xl font-bold mb-6 text-center">Create Pre-Selection Test</h1>
-            <form onSubmit={handleSubmit} className="space-y-6">
-                {questions.map((question, index) => (
-                    <div key={index} className="bg-white border border-gray-300 rounded shadow-md p-6">
-                        <label className="block mb-2 font-semibold" htmlFor={`question-${index}`}>
-                            Question {index + 1}
-                        </label>
-                        <input
-                            type="text"
-                            id={`question-${index}`}
-                            placeholder="Enter your question here"
-                            value={question.text}
-                            onChange={(e) => handleQuestionChange(index, 'text', e.target.value)}
-                            required
-                            className="w-full p-3 border border-gray-300 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        />
-                        <label className="block mb-2 font-semibold">Options:</label>
-                        {question.options.map((option, optIndex) => (
-                            <div key={optIndex} className="mb-4">
-                                <input
-                                    type="text"
-                                    placeholder={`Option ${String.fromCharCode(65 + optIndex)}`}
-                                    value={option}
-                                    onChange={(e) => handleQuestionChange(index, 'options', e.target.value, optIndex)}
-                                    required
-                                    className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-                                />
-                            </div>
-                        ))}
-                    </div>
-                ))}
-                <div className="flex justify-between">
-                    <button
-                        type="button"
-                        onClick={addQuestion}
-                        className="bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition"
-                    >
-                        Add Question
-                    </button>
-                    <button
-                        type="submit"
-                        className="bg-green-600 text-white px-5 py-2 rounded-lg shadow hover:bg-green-700 transition"
-                    >
-                        Save Test
-                    </button>
-                </div>
-            </form>
+//       <div className="flex justify-between items-center mt-10">
+//         <button
+//           onClick={handleAddQuestion}
+//           className="bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-blue-500 transition-colors duration-200"
+//         >
+//           Add Another Question
+//         </button>
+//         <button
+//           onClick={handleSubmit}
+//           className="bg-green-600 text-white font-semibold py-3 px-8 rounded-lg shadow-md hover:bg-green-500 transition-colors duration-200"
+//         >
+//           Save Test
+//         </button>
+//       </div>
+//     </div>
+//   );
+// };
+
+"use client"
+import React, { useState } from 'react';
+
+const CreateTest = () => {
+  const [testTitle, setTestTitle] = useState('');
+  const [testDescription, setTestDescription] = useState('');
+  const [questions, setQuestions] = useState([{ question: '', options: ['', '', '', ''] }]);
+
+  const handleQuestionChange = (index: number, value: string) => {
+    const newQuestions = [...questions];
+    newQuestions[index].question = value;
+    setQuestions(newQuestions);
+  };
+
+  const handleOptionChange = (questionIndex: number, optionIndex: number, value: string) => {
+    const newQuestions = [...questions];
+    newQuestions[questionIndex].options[optionIndex] = value;
+    setQuestions(newQuestions);
+  };
+
+  const addQuestion = () => {
+    setQuestions([...questions, { question: '', options: ['', '', '', ''] }]);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Handle form submission logic here
+    console.log({ testTitle, testDescription, questions });
+  };
+
+  return (
+    <div className="container mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-4">Create Pre-Selection Test</h1>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div>
+          <label htmlFor="testTitle" className="block text-lg font-medium">Test Title</label>
+          <input
+            type="text"
+            id="testTitle"
+            value={testTitle}
+            onChange={(e) => setTestTitle(e.target.value)}
+            className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+            required
+          />
         </div>
-    );
-}
+        
+        <div>
+          <label htmlFor="testDescription" className="block text-lg font-medium">Description</label>
+          <textarea
+            id="testDescription"
+            value={testDescription}
+            onChange={(e) => setTestDescription(e.target.value)}
+            className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+            rows={4}
+            required
+          />
+        </div>
+        
+        <div>
+          <h2 className="text-xl font-semibold">Questions</h2>
+          {questions.map((q, questionIndex) => (
+            <div key={questionIndex} className="mb-4 border p-4 rounded-lg shadow">
+              <label className="block text-lg font-medium">Question {questionIndex + 1}</label>
+              <input
+                type="text"
+                value={q.question}
+                onChange={(e) => handleQuestionChange(questionIndex, e.target.value)}
+                className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+                placeholder="Enter question"
+                required
+              />
+              <h3 className="mt-2 font-medium">Options</h3>
+              {q.options.map((option, optionIndex) => (
+                <div key={optionIndex} className="flex items-center mb-2">
+                  <input
+                    type="text"
+                    value={option}
+                    onChange={(e) => handleOptionChange(questionIndex, optionIndex, e.target.value)}
+                    className="mt-1 block w-full border border-gray-300 rounded-md p-2 mr-2"
+                    placeholder={`Option ${optionIndex + 1}`}
+                    required
+                  />
+                </div>
+              ))}
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={addQuestion}
+            className="mt-4 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            Add Question
+          </button>
+        </div>
+
+        <button
+          type="submit"
+          className="w-full inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+        >
+          Submit Test
+        </button>
+      </form>
+    </div>
+  );
+};
+
+export default CreateTest;
