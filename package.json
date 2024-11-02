@@ -13,9 +13,14 @@
   "devDependencies": {
     "@commitlint/cli": "^18.4.2",
     "@commitlint/config-conventional": "^18.4.2",
+    "@types/express-validator": "^3.0.2",
+    "daisyui": "^4.12.13",
     "eslint": "^8.48.0",
     "husky": "^8.0.0",
+    "install": "^0.13.0",
     "lint-staged": "^15.1.0",
+    "npm": "^10.9.0",
+    "postcss": "^8.4.47",
     "prettier": "^3.1.0",
     "tsc-alias": "^1.8.10",
     "tsconfig": "*",
@@ -33,7 +38,15 @@
     }
   },
   "dependencies": {
+    "@butterfail/tailwindcss-inverted-radius": "^0.1.2",
     "@types/axios": "^0.14.0",
-    "axios": "^1.7.2"
+    "autoprefixer": "^10.4.20",
+    "axios": "^1.7.2",
+    "express-validator": "^7.2.0",
+    "formik": "^2.4.6",
+    "next": "^15.0.1",
+    "react-toastify": "^10.0.6",
+    "toast": "^0.5.4",
+    "yup": "^1.4.0"
   }
 }
