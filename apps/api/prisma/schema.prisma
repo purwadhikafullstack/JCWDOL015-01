@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,12 +7,276 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Sample {
-  id        Int      @id @default(autoincrement())
-  name      String
-  code      String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model User {
+  id                  Int               @id @default(autoincrement())
+  password            String
+  email               String            @unique
+  name                String?
+  birthDate           DateTime?
+  gender              String?
+  education           String?
+  address             String?
+  profilePictureUrl   String?
+  verifiedCompany     Int?
+  isVerified          Boolean           @default(false)
+  subscriptionType    SubscriptionType?
+  subscriptionEndDate DateTime?
+  subscriptions       Subscription[]
+  applications        Application[]
+  notifications       Notification[]
+  paymentHistories    PaymentHistory[]
+  auth                Auth?
+  Company             Admin?            @relation(fields: [verifiedCompany], references: [id])
 
-  @@map("samples") // if you want to use snake_case format
+  CompanyReview CompanyReview[]
+
+  UserAssessment UserAssessment[]
+
+  Badge Badge[]
+}
+
+model Admin {
+  id                 Int            @id @default(autoincrement())
+  password           String
+  email              String         @unique
+  companyName        String
+  phoneNumber        String
+  companyDescription String?
+  companyLogoUrl     String?
+  status             AdminStatus
+  jobs               Job[]
+  notifications      Notification[]
+  auth               Auth?
+
+  CompanyReview CompanyReview[]
+
+  User User[]
+}
+
+model Developer {
+  id               Int               @id @default(autoincrement())
+  password         String
+  email            String            @unique
+  role             DeveloperRole
+  lastLogin        DateTime?
+  skillAssessments SkillAssessment[]
+  notifications    Notification[]
+  auth             Auth?
+}
+
+model Auth {
+  id            Int       @id @default(autoincrement())
+  userId        Int?      @unique
+  adminId       Int?      @unique
+  developerId   Int?      @unique
+  email         String    @unique
+  password      String
+  lastLogin     DateTime?
+  loginAttempts Int       @default(0)
+
+  user      User?      @relation(fields: [userId], references: [id])
+  admin     Admin?     @relation(fields: [adminId], references: [id])
+  developer Developer? @relation(fields: [developerId], references: [id])
+}
+
+model Subscription {
+  id        Int              @id @default(autoincrement())
+  userId    Int
+  type      SubscriptionType
+  startDate DateTime
+  endDate   DateTime
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+
+model Job {
+  id           Int      @id @default(autoincrement())
+  adminId      Int
+  title        String
+  description  String
+  location     String
+  salary       Float?
+  createdAt    DateTime @default(now())
+  expiryDate   DateTime
+  tags         String?
+  remoteOption Boolean
+
+  admin        Admin         @relation(fields: [adminId], references: [id])
+  applications Application[]
+}
+
+model Application {
+  id             Int               @id @default(autoincrement())
+  jobId          Int
+  userId         Int
+  status         ApplicationStatus
+  resumeUrl      String
+  appliedAt      DateTime          @default(now())
+  coverLetter    String?
+  expectedSalary Float?
+
+  interviewSchedule InterviewSchedule?
+
+  job  Job  @relation(fields: [jobId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+}
+
+model SkillAssessment {
+  id              Int             @id @default(autoincrement())
+  developerId     Int
+  title           String
+  description     String
+  questionCount   Int
+  difficultyLevel DifficultyLevel
+  isActive        Boolean         @default(true)
+
+  developer Developer @relation(fields: [developerId], references: [id])
+
+  Question Question[]
+
+  UserAssessment UserAssessment[]
+}
+
+model Question {
+  id            Int    @id @default(autoincrement())
+  assessmentId  Int
+  content       String
+  options       Json // Contoh format JSON untuk pilihan: ["A", "B", "C", "D"]
+  correctAnswer String // Contoh: "A" untuk jawaban yang benar
+
+  assessment SkillAssessment @relation(fields: [assessmentId], references: [id])
+}
+
+model UserAssessment {
+  id           Int       @id @default(autoincrement())
+  userId       Int
+  assessmentId Int
+  score        Int
+  passed       Boolean   @default(false)
+  completedAt  DateTime?
+
+  user       User            @relation(fields: [userId], references: [id])
+  assessment SkillAssessment @relation(fields: [assessmentId], references: [id])
+}
+
+model InterviewSchedule {
+  id            Int             @id @default(autoincrement())
+  applicationId Int             @unique
+  dateTime      DateTime
+  location      String
+  status        InterviewStatus
+
+  application Application @relation(fields: [applicationId], references: [id])
+}
+
+model Notification {
+  id          Int                @id @default(autoincrement())
+  userId      Int?
+  adminId     Int?
+  developerId Int?
+  message     String
+  type        NotificationType
+  createdAt   DateTime           @default(now())
+  status      NotificationStatus
+
+  user      User?      @relation(fields: [userId], references: [id])
+  admin     Admin?     @relation(fields: [adminId], references: [id])
+  developer Developer? @relation(fields: [developerId], references: [id])
+}
+
+model PaymentHistory {
+  id            Int           @id @default(autoincrement())
+  userId        Int
+  amount        Float
+  paymentMethod PaymentMethod
+  paymentDate   DateTime      @default(now())
+  transactionId String
+  status        PaymentStatus
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+enum SubscriptionType {
+  STANDARD
+  PROFESSIONAL
+}
+
+enum AdminStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum DeveloperRole {
+  ADMIN
+  SUPPORT
+}
+
+enum ApplicationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  UNDER_REVIEW
+}
+
+enum DifficultyLevel {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum InterviewStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELED
+}
+
+enum NotificationType {
+  EMAIL
+  ALERT
+  REMINDER
+}
+
+enum NotificationStatus {
+  SENT
+  PENDING
+}
+
+enum PaymentMethod {
+  MANUAL
+  GATEWAY
+}
+
+enum PaymentStatus {
+  APPROVED
+  PENDING
+  FAILED
+}
+
+model CompanyReview {
+  id                       Int      @id @default(autoincrement())
+  companyId                Int
+  userId                   Int
+  position                 String
+  rating                   Int
+  salaryEstimate           Float?
+  cultureScore             Int
+  workLifeBalanceScore     Int
+  facilitiesScore          Int
+  careerOpportunitiesScore Int
+  comment                  String?
+  createdAt                DateTime @default(now())
+
+  user    User  @relation(fields: [userId], references: [id])
+  company Admin @relation(fields: [companyId], references: [id])
+}
+
+model Badge {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  title       String
+  description String
+  awardedAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
 }
