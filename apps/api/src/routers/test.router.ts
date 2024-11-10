@@ -1,4 +1,4 @@
-import { TestController } from '@/controllers/test.controller'; 
+import { TestController } from '@/controllers/test.controller';
 import { Router } from 'express';
 import { checkAdmin } from '@/middlewares/checkAdmin';
 
@@ -14,23 +14,35 @@ export class TestRouter {
 
     private initializeRoutes(): void {
         // Route for creating a pre-selection test (admin only)
-        // this.router.post('/tests', checkAdmin, this.testController.createPreSelectionTest);
-        this.router.post('/tests', this.testController.createPreSelectionTest);
+        this.router.post('/', checkAdmin, this.testController.createPreSelectionTest);
 
         // Route for editing a pre-selection test (admin only)
-        this.router.patch('/tests/:testId', checkAdmin, this.testController.updatePreSelectionTest);
+        this.router.patch('/:testId', checkAdmin, this.testController.updatePreSelectionTest);
 
         // Route for linking a test to a job application (can be accessed by all)
-        this.router.put('/tests/link', this.testController.linkTestToJobApplication);
+        this.router.put('/link', this.testController.linkTestToJobApplication);
 
         // Route for submitting a pre-selection test (can be accessed by all)
-        this.router.post('/tests/submit', this.testController.submitPreSelectionTest);
+        this.router.post('/submit', this.testController.submitPreSelectionTest);
+
+        // Route for getting a specific test by ID (can be accessed by all)
+        this.router.get('/:testId', this.testController.getTestById);
 
         // Route for getting test results (can be accessed by all)
-        this.router.get('/tests/:testId/results', this.testController.getTestResults);
+        this.router.get('/:testId/results', this.testController.getTestResults);
     }
 
     public getRouter(): Router { 
         return this.router;
     }
 }
+
+// // CREATE TEST WITH QUESTION AND CHOICE
+// import express from 'express';
+// import { createTest } from '../controllers/test.controller';  // Use the correct controller function
+
+// const router = express.Router();
+
+// router.post('/createWithQuestions', createTest);  // Use the createTest controller
+
+// export default router;

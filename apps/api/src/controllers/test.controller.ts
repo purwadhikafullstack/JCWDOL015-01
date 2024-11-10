@@ -1,50 +1,39 @@
 // import { Request, Response } from 'express';
-// import { createPreSelectionTest } from '@/service/test.service';
-// import prisma from '@/prisma';
+// import {createPreSelectionTest, updatePreSelectionTest, linkTestToJobApplication, submitPreSelectionTest, getTestResults, getTestsByJobId} from '@/services/test.service';
+
+import prisma from "@/prisma";
 
 // export class TestController {
 //     async createPreSelectionTest(req: Request, res: Response) {
 //         try {
-//             await createPreSelectionTest(req, res); // Call the service directly
-//         } catch (error) {
-//             return res.status(500).json({ message: 'Failed to create pre-selection test.', error: error.message });
+//             // Call the service function to create the pre-selection test
+//             const test = await createPreSelectionTest(req.body);
+//             // Return a 201 status with the created test data
+//             return res.status(201).json(test);
+//         } catch (error: unknown) {
+//             // Error handling
+//             if (error instanceof Error) {
+//                 return res.status(500).json({ message: 'Failed to create pre-selection test.', error: error.message });
+//             }
+//             return res.status(500).json({ message: 'Failed to create pre-selection test.', error: 'Unknown error' });
 //         }
 //     }
 
 //     async updatePreSelectionTest(req: Request, res: Response) {
 //         const { testId } = req.params;
-//         const { test_name, job_id } = req.body;
-    
-//         // Check if testId exists
-//         if (!testId || (!test_name && !job_id)) {
-//             return res.status(400).json({ message: 'Test ID is required and at least one field to update.' });
-//         }
-    
-//         // Convert testId to number
-//         const parsedTestId = parseInt(testId, 10);
-    
-//         // Check if parsedTestId is a valid number
-//         if (isNaN(parsedTestId)) {
-//             return res.status(400).json({ message: 'Invalid Test ID format.' });
-//         }
-    
+//         const updateData = req.body;
+
 //         try {
-//             const updatedTest = await prisma.test.update({
-//                 where: { id: parsedTestId }, // Use the parsed number here
-//                 data: {
-//                     ...(test_name && { title: test_name }), 
-//                     ...(job_id && { job_id: job_id }), 
-//                     updated_at: new Date(), 
-//                 },
-//             });
-    
+//             const updatedTest = await updatePreSelectionTest(Number(testId), updateData);
 //             return res.status(200).json(updatedTest);
-//         } catch (error) {
-//             console.error(error);
-//             return res.status(500).json({ message: 'Failed to update test.' });
+//         } catch (error: unknown) {
+//             if (error instanceof Error) {
+//                 return res.status(500).json({ message: 'Failed to update pre-selection test.', error: error.message });
+//             }
+//             return res.status(500).json({ message: 'Failed to update pre-selection test.', error: 'Unknown error' });
 //         }
 //     }
-    
+
 //     async linkTestToJobApplication(req: Request, res: Response) {
 //         const { jobId, testId } = req.body;
 
@@ -52,14 +41,15 @@
 //             return res.status(400).json({ message: 'Job ID and Test ID are required.' });
 //         }
 
-//         const updatedJob = await prisma.job.update({
-//             where: { id: jobId },
-//             data: {
-//                 test: { connect: { id: testId } }, // Assuming you're connecting the test to the job
-//             },
-//         });
-
-//         return res.status(200).json(updatedJob);
+//         try {
+//             const updatedJob = await linkTestToJobApplication(jobId, testId);
+//             return res.status(200).json(updatedJob);
+//         } catch (error: unknown) {
+//             if (error instanceof Error) {
+//                 return res.status(500).json({ message: 'Failed to link test to job application.', error: error.message });
+//             }
+//             return res.status(500).json({ message: 'Failed to link test to job application.', error: 'Unknown error' });
+//         }
 //     }
 
 //     async submitPreSelectionTest(req: Request, res: Response) {
@@ -69,321 +59,146 @@
 //             return res.status(400).json({ message: 'Applicant ID, Test ID, and Score are required.' });
 //         }
 
-//         const submittedTest = await prisma.result.create({
-//             data: {
-//                 applicant_id: applicantId, 
-//                 test_id: testId, 
-//                 score: score,
-//                 completed_at: new Date(), 
-//             },
-//         });
-
-//         return res.status(201).json(submittedTest);
+//         try {
+//             const submittedTest = await submitPreSelectionTest(applicantId, testId, score);
+//             return res.status(201).json(submittedTest);
+//         } catch (error: unknown) {
+//             if (error instanceof Error) {
+//                 return res.status(500).json({ message: 'Failed to submit pre-selection test.', error: error.message });
+//             }
+//             return res.status(500).json({ message: 'Failed to submit pre-selection test.', error: 'Unknown error' });
+//         }
 //     }
 
 //     async getTestResults(req: Request, res: Response) {
 //         const { testId } = req.params;
-    
-//         // Convert testId to a number
-//         const parsedTestId = parseInt(testId, 10);
-    
-//         // Check if parsedTestId is a valid number
-//         if (isNaN(parsedTestId)) {
-//             return res.status(400).json({ message: 'Invalid Test ID format.' });
-//         }
-    
-//         try {
-//             const results = await prisma.result.findMany({
-//                 where: { test_id: parsedTestId }, // Use the parsed number here
-//                 include: { applicant: true }, 
-//             });
-    
-//             return res.status(200).json(results);
-//         } catch (error) {
-//             console.error(error);
-//             return res.status(500).json({ message: 'Failed to retrieve test results.' });
-//         }
-//     }
-    
-
-//     async getTestsByJobId(req: Request, res: Response) {
-//         const { jobId } = req.params;
-    
-//         // Check if jobId is provided
-//         if (!jobId) {
-//             return res.status(400).json({ message: 'Job ID is required.' });
-//         }
-    
-//         // Convert jobId to a number
-//         const parsedJobId = parseInt(jobId, 10);
-    
-//         // Check if parsedJobId is a valid number
-//         if (isNaN(parsedJobId)) {
-//             return res.status(400).json({ message: 'Invalid Job ID format.' });
-//         }
-    
-//         try {
-//             const tests = await prisma.test.findMany({
-//                 where: { job_id: parsedJobId }, // Use the parsed number here
-//             });
-    
-//             return res.status(200).json(tests);
-//         } catch (error) {
-//             console.error(error);
-//             return res.status(500).json({ message: 'Failed to retrieve tests.' });
-//         }
-//     }
-// }
-// import { Request, Response } from 'express';
-// import { createPreSelectionTest } from '@/service/test.service';
-// import prisma from '@/prisma';
-
-// export class TestController {
-//     async createPreSelectionTest(req: Request, res: Response): Promise<Response> {
-//         try {
-//             await createPreSelectionTest(req, res);
-//             return res.status(201).json({ message: 'Test created successfully' }); 
-//         } catch (error: unknown) {
-//             if (error instanceof Error) {
-//                 return res.status(500).json({ message: 'Failed to create pre-selection test.', error: error.message });
-//             } else {
-//                 return res.status(500).json({ message: 'An unknown error occurred.' });
-//             }
-//         }
-//     }
-
-//     async updatePreSelectionTest(req: Request, res: Response): Promise<Response> {
-//         const { testId } = req.params;
-//         const { test_name, job_id } = req.body;
-
-//         if (!testId || (!test_name && !job_id)) {
-//             return res.status(400).json({ message: 'Test ID is required and at least one field to update.' });
-//         }
-
-//         const parsedTestId = parseInt(testId, 10);
-//         if (isNaN(parsedTestId)) {
-//             return res.status(400).json({ message: 'Invalid Test ID format.' });
-//         }
 
 //         try {
-//             const updatedTest = await prisma.test.update({
-//                 where: { id: parsedTestId },
-//                 data: {
-//                     ...(test_name && { title: test_name }),
-//                     ...(job_id && { job_id: job_id }),
-//                     updated_at: new Date(),
-//                 },
-//             });
-
-//             return res.status(200).json(updatedTest);
-//         } catch (error: unknown) {
-//             if (error instanceof Error) {
-//                 return res.status(500).json({ message: 'Failed to update test.', error: error.message });
-//             } else {
-//                 return res.status(500).json({ message: 'An unknown error occurred.' });
-//             }
-//         }
-//     }
-
-//     // Implement similar error handling for the other methods
-//     async linkTestToJobApplication(req: Request, res: Response): Promise<Response> {
-//         const { jobId, testId } = req.body;
-
-//         if (!jobId || !testId) {
-//             return res.status(400).json({ message: 'Job ID and Test ID are required.' });
-//         }
-
-//         try {
-//             const updatedJob = await prisma.job.update({
-//                 where: { id: jobId },
-//                 data: {
-//                     test: { connect: { id: testId } },
-//                 },
-//             });
-//             return res.status(200).json(updatedJob);
-//         } catch (error: unknown) {
-//             if (error instanceof Error) {
-//                 return res.status(500).json({ message: 'Failed to link test to job application.', error: error.message });
-//             } else {
-//                 return res.status(500).json({ message: 'An unknown error occurred.' });
-//             }
-//         }
-//     }
-
-//     async submitPreSelectionTest(req: Request, res: Response): Promise<Response> {
-//         const { applicantId, testId, score } = req.body;
-
-//         if (!applicantId || !testId || score === undefined) {
-//             return res.status(400).json({ message: 'Applicant ID, Test ID, and Score are required.' });
-//         }
-
-//         try {
-//             const submittedTest = await prisma.result.create({
-//                 data: {
-//                     applicant_id: applicantId,
-//                     test_id: testId,
-//                     score: score,
-//                     completed_at: new Date(),
-//                 },
-//             });
-
-//             return res.status(201).json(submittedTest);
-//         } catch (error: unknown) {
-//             if (error instanceof Error) {
-//                 return res.status(500).json({ message: 'Failed to submit test.', error: error.message });
-//             } else {
-//                 return res.status(500).json({ message: 'An unknown error occurred.' });
-//             }
-//         }
-//     }
-
-//     async getTestResults(req: Request, res: Response): Promise<Response> {
-//         const { testId } = req.params;
-//         const parsedTestId = parseInt(testId, 10);
-
-//         if (isNaN(parsedTestId)) {
-//             return res.status(400).json({ message: 'Invalid Test ID format.' });
-//         }
-
-//         try {
-//             const results = await prisma.result.findMany({
-//                 where: { test_id: parsedTestId },
-//                 include: { applicant: true },
-//             });
-
+//             const results = await getTestResults(Number(testId));
 //             return res.status(200).json(results);
 //         } catch (error: unknown) {
 //             if (error instanceof Error) {
 //                 return res.status(500).json({ message: 'Failed to retrieve test results.', error: error.message });
-//             } else {
-//                 return res.status(500).json({ message: 'An unknown error occurred.' });
 //             }
+//             return res.status(500).json({ message: 'Failed to retrieve test results.', error: 'Unknown error' });
 //         }
 //     }
 
-//     async getTestsByJobId(req: Request, res: Response): Promise<Response> {
+//     async getTestsByJobId(req: Request, res: Response) {
 //         const { jobId } = req.params;
 
-//         if (!jobId) {
-//             return res.status(400).json({ message: 'Job ID is required.' });
-//         }
-
-//         const parsedJobId = parseInt(jobId, 10);
-//         if (isNaN(parsedJobId)) {
-//             return res.status(400).json({ message: 'Invalid Job ID format.' });
-//         }
-
 //         try {
-//             const tests = await prisma.test.findMany({
-//                 where: { job_id: parsedJobId },
-//             });
-
+//             const tests = await getTestsByJobId(Number(jobId));
 //             return res.status(200).json(tests);
 //         } catch (error: unknown) {
 //             if (error instanceof Error) {
 //                 return res.status(500).json({ message: 'Failed to retrieve tests.', error: error.message });
-//             } else {
-//                 return res.status(500).json({ message: 'An unknown error occurred.' });
 //             }
+//             return res.status(500).json({ message: 'Failed to retrieve tests.', error: 'Unknown error' });
 //         }
 //     }
 // }
 
+
 import { Request, Response } from 'express';
-import {createPreSelectionTest, updatePreSelectionTest, linkTestToJobApplication, submitPreSelectionTest, getTestResults, getTestsByJobId} from '@/service/test.service';
+import * as testService from '@/services/test.service';
 
 export class TestController {
-    async createPreSelectionTest(req: Request, res: Response) {
+    public async createPreSelectionTest(req: Request, res: Response): Promise<void> {
         try {
-            // Call the service function to create the pre-selection test
-            const test = await createPreSelectionTest(req.body);
-            // Return a 201 status with the created test data
-            return res.status(201).json(test);
-        } catch (error: unknown) {
-            // Error handling
-            if (error instanceof Error) {
-                return res.status(500).json({ message: 'Failed to create pre-selection test.', error: error.message });
-            }
-            return res.status(500).json({ message: 'Failed to create pre-selection test.', error: 'Unknown error' });
+            const testData = req.body;
+            const newTest = await testService.createPreSelectionTest(testData);
+            res.status(201).json(newTest);
+        } catch (error) {
+            res.status(500).json({ message: 'Error creating test', error });
         }
     }
 
-    async updatePreSelectionTest(req: Request, res: Response) {
-        const { testId } = req.params;
-        const updateData = req.body;
-
+    public async updatePreSelectionTest(req: Request, res: Response): Promise<void> {
         try {
-            const updatedTest = await updatePreSelectionTest(Number(testId), updateData);
-            return res.status(200).json(updatedTest);
-        } catch (error: unknown) {
-            if (error instanceof Error) {
-                return res.status(500).json({ message: 'Failed to update pre-selection test.', error: error.message });
-            }
-            return res.status(500).json({ message: 'Failed to update pre-selection test.', error: 'Unknown error' });
+            const testId = parseInt(req.params.testId, 10);
+            const updateData = req.body;
+            const updatedTest = await testService.updatePreSelectionTest(testId, updateData);
+            res.status(200).json(updatedTest);
+        } catch (error) {
+            res.status(500).json({ message: 'Error updating test', error });
         }
     }
 
-    async linkTestToJobApplication(req: Request, res: Response) {
-        const { jobId, testId } = req.body;
-
-        if (!jobId || !testId) {
-            return res.status(400).json({ message: 'Job ID and Test ID are required.' });
-        }
-
+    public async linkTestToJobApplication(req: Request, res: Response): Promise<void> {
         try {
-            const updatedJob = await linkTestToJobApplication(jobId, testId);
-            return res.status(200).json(updatedJob);
-        } catch (error: unknown) {
-            if (error instanceof Error) {
-                return res.status(500).json({ message: 'Failed to link test to job application.', error: error.message });
-            }
-            return res.status(500).json({ message: 'Failed to link test to job application.', error: 'Unknown error' });
+            const { jobId, testId } = req.body;
+            const linkedTest = await testService.linkTestToJobApplication(jobId, testId);
+            res.status(200).json(linkedTest);
+        } catch (error) {
+            res.status(500).json({ message: 'Error linking test to job application', error });
         }
     }
 
-    async submitPreSelectionTest(req: Request, res: Response) {
-        const { applicantId, testId, score } = req.body;
-
-        if (!applicantId || !testId || score === undefined) {
-            return res.status(400).json({ message: 'Applicant ID, Test ID, and Score are required.' });
-        }
-
+    public async submitPreSelectionTest(req: Request, res: Response): Promise<void> {
         try {
-            const submittedTest = await submitPreSelectionTest(applicantId, testId, score);
-            return res.status(201).json(submittedTest);
-        } catch (error: unknown) {
-            if (error instanceof Error) {
-                return res.status(500).json({ message: 'Failed to submit pre-selection test.', error: error.message });
-            }
-            return res.status(500).json({ message: 'Failed to submit pre-selection test.', error: 'Unknown error' });
+            const { applicantId, testId, score } = req.body;
+            const result = await testService.submitPreSelectionTest(applicantId, testId, score);
+            res.status(201).json(result);
+        } catch (error) {
+            res.status(500).json({ message: 'Error submitting test', error });
         }
     }
 
-    async getTestResults(req: Request, res: Response) {
-        const { testId } = req.params;
-
+    public async getTestResults(req: Request, res: Response): Promise<void> {
         try {
-            const results = await getTestResults(Number(testId));
-            return res.status(200).json(results);
-        } catch (error: unknown) {
-            if (error instanceof Error) {
-                return res.status(500).json({ message: 'Failed to retrieve test results.', error: error.message });
-            }
-            return res.status(500).json({ message: 'Failed to retrieve test results.', error: 'Unknown error' });
+            const testId = parseInt(req.params.testId, 10);
+            const results = await testService.getTestResults(testId);
+            res.status(200).json(results);
+        } catch (error) {
+            res.status(500).json({ message: 'Error retrieving test results', error });
         }
     }
 
-    async getTestsByJobId(req: Request, res: Response) {
-        const { jobId } = req.params;
-
+    // New function to get a test by ID
+    public async getTestById(req: Request, res: Response): Promise<void> {
         try {
-            const tests = await getTestsByJobId(Number(jobId));
-            return res.status(200).json(tests);
-        } catch (error: unknown) {
-            if (error instanceof Error) {
-                return res.status(500).json({ message: 'Failed to retrieve tests.', error: error.message });
+            const testId = parseInt(req.params.testId, 10);
+            const test = await testService.getTestById(testId);
+            if (test) {
+                res.status(200).json(test);
+            } else {
+                res.status(404).json({ message: 'Test not found' });
             }
-            return res.status(500).json({ message: 'Failed to retrieve tests.', error: 'Unknown error' });
+        } catch (error) {
+            res.status(500).json({ message: 'Error retrieving test', error });
         }
     }
 }
+
+// // CREATE TEST WITH QUESTION AND CHOICE
+// import { Request, Response } from 'express';
+// import { createTestWithQuestions } from '../services/test.service';
+
+// export async function createTest(req: Request, res: Response) {
+//   try {
+//     const data = req.body;  // Get the data from the request body
+//     const createdTest = await createTestWithQuestions(data);  // Call the service function
+
+//     // Send success response with the test ID
+//     return res.status(201).json({
+//       message: 'Test created successfully',
+//       test_id: createdTest.id,  // Return the created test's ID
+//     });
+//   } catch (error: unknown) {  // Specify the error type
+//     // Check if the error is an instance of Error
+//     if (error instanceof Error) {
+//       console.error(error.message);  // Access the error message
+//       return res.status(500).json({
+//         message: 'Failed to create test',
+//         error: error.message,  // Access the message of the error
+//       });
+//     }
+
+//     // If the error is not an instance of Error, return a generic message
+//     return res.status(500).json({
+//       message: 'Failed to create test',
+//       error: 'An unknown error occurred',  // Fallback error message
+//     });
+//   }
+// }

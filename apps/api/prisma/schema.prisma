@@ -176,12 +176,13 @@ model Test {
   created_by   Int  
   created_at   DateTime @default(now())
   updated_at   DateTime @updatedAt
-  title       String   
-  test_file   String?  
+  title       String    
   questions   Question[]
   results     Result[]
   job         Job      @relation(fields: [job_id], references: [id])
   admin       Admin    @relation(fields: [created_by], references: [id])
+
+  @@map("tests")
 }
 
 model Question {
@@ -190,6 +191,8 @@ model Question {
   question_text String 
   choices      Choice[]
   test         Test     @relation(fields: [test_id], references: [id])
+
+   @@map("questions")
 }
 
 model Choice {
@@ -198,6 +201,8 @@ model Choice {
   choice_text   String  
   is_correct    Boolean  
   question     Question @relation(fields: [question_id], references: [id])
+
+   @@map("choices") 
 }
 
 model Result {
@@ -223,15 +228,28 @@ model Applicant {
   result Result[]
 }
 
+// model Analytics {
+//   id               Int       @id @default(autoincrement())
+//   user_id          Int 
+//   age               Int
+//   gender            String?
+//   location          String?
+//   salary_reported   Decimal? 
+//   interests         String?
+//   user              User      @relation(fields: [user_id], references: [id]) 
+// }
+
 model Analytics {
-  id               Int       @id @default(autoincrement())
-  user_id          Int 
-  age               Int
-  gender            String?
-  location          String?
-  salary_reported   Decimal? 
-  interests         String?
-  user              User      @relation(fields: [user_id], references: [id]) 
+  id              Int       @id @default(autoincrement())
+  user_id         Int 
+  age             Int
+  gender          String?
+  location        String?
+  salary          Decimal? 
+  interests       Json?     // Store multiple interests as a JSON array
+  recorded_at     DateTime  @default(now())  // timestamp for when the data was recorded
+  
+  user            User      @relation(fields: [user_id], references: [id]) 
 }
 
 enum SubscriptionType {

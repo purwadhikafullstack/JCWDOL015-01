@@ -1,4 +1,3 @@
-// components/QuestionInput.tsx
 import { Dispatch, SetStateAction } from 'react';
 
 interface QuestionInputProps {
@@ -24,8 +23,8 @@ const QuestionInput = ({ questionIndex, question, setQuestions, questions }: Que
   };
 
   return (
-    <div className="mb-6 bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-      <label className="block text-lg font-semibold text-gray-800 mb-4">
+    <div className="mb-4 bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+      <label className="block text-lg font-semibold text-gray-800 mb-2">
         Question {questionIndex + 1}
       </label>
       <input
