@@ -232,9 +232,8 @@ export class JobController {
             const pageNum = parseInt(page as string);
             const limitNum = parseInt(limit as string);
             const offset = (pageNum - 1) * limitNum;
-
             const jobs = await getPostingsService({...req.query, offset, limit:limitNum});
-            const jobsWithApplicantCount = jobs.map((job) => ({
+            const jobsWithApplicantCount = jobs.map((job: { applicant: any[] }) => ({
                 ...job,
                 applicantCount: job.applicant.length,
             }));
