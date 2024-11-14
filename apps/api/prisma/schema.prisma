@@ -188,7 +188,7 @@ model Test {
 model Question {
   id           Int       @id @default(autoincrement())
   test_id      Int
-  question_text String 
+  question_text String @db.VarChar(500)
   choices      Choice[]
   test         Test     @relation(fields: [test_id], references: [id])
 
@@ -273,6 +273,8 @@ enum ApplicationStatus {
   accepted
   rejected
   under_review
+  in_process
+  interview
 }
 
 enum InterviewStatus {

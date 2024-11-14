@@ -251,6 +251,46 @@ export const rejectApplicant = async (applicantId: number, jobId: number) => {
   throw new Error("Application not found for this applicant and job posting");
 };
 
+// Mark an applicant as in process (update their application status)
+export const inProcessApplicant = async (applicantId: number, jobId: number) => {
+  const application = await prisma.application.findFirst({
+    where: {
+      user_id: applicantId,
+      job_id: jobId,
+    },
+  });
+
+  if (application) {
+    return await prisma.application.update({
+      where: { id: application.id },
+      data: { status: 'pending' }, // Update the status to in process
+    });
+  }
+
+  throw new Error("Application not found for this applicant and job posting");
+};
+
+// Interview an applicant (update their application status)
+export const interviewApplicant = async (applicantId: number, jobId: number) => {
+  const application = await prisma.application.findFirst({
+    where: {
+      user_id: applicantId,
+      job_id: jobId,
+    },
+  });
+
+  if (application) {
+    return await prisma.application.update({
+      where: { id: application.id },
+      data: { status: 'interview' }, // Update the status to interview
+    });
+  }
+
+  throw new Error("Application not found for this applicant and job posting");
+};
+
+
+
 // Fetch test results for all applicants
 export const getApplicantTestResults = async () => {
   return await prisma.result.findMany({

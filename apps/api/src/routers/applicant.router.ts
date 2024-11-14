@@ -5,7 +5,9 @@ import {
   getApplicantByIdController, 
   acceptApplicantController, 
   rejectApplicantController, 
-  fetchApplicantTestResultsController 
+  fetchApplicantTestResultsController, 
+  inProcessApplicantController,
+  interviewApplicantController
 } from '@/controllers/applicant.controller';
 
 const router = Router();
@@ -24,6 +26,12 @@ router.put('/:id/accept/:jobId', acceptApplicantController);
 
 // Route to reject an applicant
 router.put('/:id/reject/:jobId', rejectApplicantController);
+
+// Route to in_proccess an applicant
+router.put('/:id/in_proccess/:jobId', inProcessApplicantController);
+
+// Route to interview an applicant
+router.put('/:id/interview/:jobId', interviewApplicantController);
 
 // Route to fetch applicant test results
 router.get('/test-results', fetchApplicantTestResultsController);

@@ -59,6 +59,8 @@ import {
   getApplicantById, 
   acceptApplicant, 
   rejectApplicant, 
+  inProcessApplicant,
+  interviewApplicant,
   getApplicantTestResults 
 } from '@/services/applicant.service';
 
@@ -125,6 +127,30 @@ export async function rejectApplicantController(req: Request, res: Response): Pr
   } catch (error) {
     console.error("Error rejecting applicant:", error);
     res.status(500).json({ message: "Error rejecting applicant" });
+  }
+}
+
+export async function inProcessApplicantController(req: Request, res: Response): Promise<void> {
+  const { id, jobId } = req.params;  // Extract applicantId and jobId from URL params
+
+  try {
+    await inProcessApplicant(parseInt(id, 10), parseInt(jobId, 10));  // Pass both params
+    res.status(200).json({ message: "Applicant inProcessed" });
+  } catch (error) {
+    console.error("Error inProcessing applicant:", error);
+    res.status(500).json({ message: "Error inProcessing applicant" });
+  }
+}
+
+export async function interviewApplicantController(req: Request, res: Response): Promise<void> {
+  const { id, jobId } = req.params;  // Extract applicantId and jobId from URL params
+
+  try {
+    await interviewApplicant(parseInt(id, 10), parseInt(jobId, 10));  // Pass both params
+    res.status(200).json({ message: "Applicant interviewed" });
+  } catch (error) {
+    console.error("Error interviewing applicant:", error);
+    res.status(500).json({ message: "Error interviewing applicant" });
   }
 }
 
