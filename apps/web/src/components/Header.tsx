@@ -5,7 +5,6 @@ export const Header = () => {
     <header style={styles.header}>
       <div style={styles.logo}>On To Work</div>
       <nav style={styles.nav}>
-        <Link href="/create-preselection-test" style={styles.link}>Create Preselection Test</Link>
         <Link href="/dashboard" style={styles.link}>Dashboard</Link>
       </nav>
     </header>
