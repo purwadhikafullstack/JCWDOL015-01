@@ -30,6 +30,9 @@ export class TestRouter {
 
         // Route for getting test results (can be accessed by all)
         this.router.get('/:testId/results', this.testController.getTestResults);
+
+        // Route for updating a pre-selection test (admin only)
+        this.router.put('/:testId', checkAdmin, this.testController.updatePreSelectionTest);
     }
 
     public getRouter(): Router { 

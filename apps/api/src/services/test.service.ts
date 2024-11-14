@@ -228,8 +228,14 @@ import prisma from "@/prisma";
 
 // Service to create a pre-selection test with associated questions and choices
 export const createPreSelectionTest = async (data: any) => {
-    const { questions, ...testData } = data;
+    const { questions, job_id } = data;
 
+    // get job data
+    const job = await prisma.job.findUnique({ where: { id: job_id } });
+    
+    const testData = { job_id, created_by: 1, title: `Pre-selection Test for ${job?.title}`, created_at: new Date() };
+
+    // return false;
     return await prisma.test.create({
         data: {
             ...testData,
@@ -250,10 +256,27 @@ export const createPreSelectionTest = async (data: any) => {
 
 // Service to update an existing pre-selection test by testId
 export const updatePreSelectionTest = async (testId: number, updateData: any) => {
+    console.log(testId);
     return await prisma.test.update({
         where: { id: testId },
         data: {
-            ...updateData,
+            questions: {
+                update: updateData.questions.map((question: any) => ({
+                    where: { id: question.id },
+                    data: {
+                        question_text: question.question_text,
+                        choices: {
+                            update: question.choices.map((choice: any) => ({
+                                where: { id: choice.id },
+                                data: {
+                                    choice_text: choice.choice_text,
+                                    is_correct: choice.is_correct,
+                                },
+                            })),
+                        },
+                    },
+                })),
+            },
             updated_at: new Date(), // Updating the `updated_at` timestamp
         },
     });
@@ -291,8 +314,9 @@ export const getTestResults = async (testId: number) => {
 
 // Service to get all tests associated with a specific job by jobId
 export const getTestsByJobId = async (jobId: number) => {
-    return await prisma.test.findMany({
+    return await prisma.test.findFirst({
         where: { job_id: jobId },
+        include: { questions: { include: { choices: true } } },
     });
 };
 
