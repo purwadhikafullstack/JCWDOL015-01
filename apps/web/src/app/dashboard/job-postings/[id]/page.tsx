@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/DashboardLayout';
 import { formatCurrency, formatDate } from '@/utils/utils';
+import Link from 'next/link';
 
 interface Applicant {
   id: number;
@@ -73,6 +74,10 @@ const JobPostingDetail = ({ params }: { params: { id: string } }) => {
             <p><strong>Salary:</strong> {formatCurrency(job.salary ?? 0)}</p>
             <p><strong>Description:</strong> {job.description}</p>
             <p><strong>Status:</strong> {job.published ? "Published" : "Not Published"}</p>
+            <p>
+              <strong>Requires Test:</strong> {job.requires_test ? "Yes" : "No"}
+              {job.requires_test && <Link className="ml-2 text-blue-500 underline " href={`/dashboard/job-postings/${job.id}/manage-test`}>Manage Test</Link>}
+            </p>
           </div>
 
           {/* Applicants Section */}

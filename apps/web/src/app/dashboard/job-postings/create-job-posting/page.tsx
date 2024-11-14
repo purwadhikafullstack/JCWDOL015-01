@@ -491,6 +491,7 @@ const CreateJobPosting = () => {
         e.preventDefault();
 
         const formData = new FormData();
+        formData.append('admin_id', '1'); // Replace with the actual admin ID
         formData.append('title', jobData.title);
         formData.append('description', jobData.description);
         if (jobData.banner) {
@@ -508,13 +509,13 @@ const CreateJobPosting = () => {
         formData.append('is_published', String(jobData.isPublished)); // Append published status
         formData.append('created_at', new Date().toString());
 
-        const response = await fetch('/api/job-postings', {
+        const response = await fetch('http://localhost:8000/api/jobs', {
             method: 'POST',
             body: formData,
         });
 
         if (response.ok) {
-            router.push('/job-postings/create-job-posting/confirmation?status=posted');
+            router.push('/dashboard/job-postings/create-job-posting/confirmation?status=posted');
         } else {
             console.error('Failed to create job posting');
         }

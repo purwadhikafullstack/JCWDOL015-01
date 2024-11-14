@@ -77,10 +77,15 @@ import { PrismaClient } from '@prisma/client';
         category?: string;
         sortField?: string;
         sortOrder?: 'asc' | 'desc';
+        offset?: number;
+        limit?: number;
     }) => {
-      const { title, category, sortField, sortOrder } = query;
+      const { title, category, sortField, sortOrder, offset = 0, limit = 10 } = query;
+      console.log(title);
 
       return await prisma.job.findMany({
+        skip: offset,
+        take: limit,
         where: {
           title: title ? { contains: title } : undefined,
           category: category ? { contains: category } : undefined,
@@ -88,6 +93,20 @@ import { PrismaClient } from '@prisma/client';
         orderBy: sortField ? { [sortField]: sortOrder ?? 'asc' } : undefined,
         include: {
           applicant: true, // Be cautious with large data sets
+        },
+      });
+    };
+
+    export const getTotalJobs = async (query: {
+        title?: string;
+        category?: string;
+    }) => {
+      const { title, category } = query;
+
+      return await prisma.job.count({
+        where: {
+          title: title ? { contains: title } : undefined,
+          category: category ? { contains: category } : undefined,
         },
       });
     };

@@ -27,5 +27,8 @@ router.get('/', jobController.getJobPostings.bind(jobController));
 // Route for getting details of a specific job posting
 router.get('/:id', jobController.getJobPostingDetail.bind(jobController));
 
+// Route for getting test job posting
+router.get('/:id/test', jobController.getJobPostingTest.bind(jobController));
+
 // Export the router to use in your main app file
 export default router;

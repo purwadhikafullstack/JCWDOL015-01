@@ -1,9 +1,9 @@
 // import { Request, Response } from 'express';
 // import { Decimal } from '@prisma/client/runtime/library'; // Ensure you import Decimal correctly
-// import { 
-//     updateJobPosting as updateJobService, 
-//     createJobPosting as createJobService, 
-//     deleteJobPosting as deleteJobService, 
+// import {
+//     updateJobPosting as updateJobService,
+//     createJobPosting as createJobService,
+//     deleteJobPosting as deleteJobService,
 //     toggleJobPublishStatus as togglePublishService,
 //     getJobPostings as getPostingsService,
 //     getJobPostingDetail as getPostingDetailService
@@ -109,8 +109,11 @@ import {
     deleteJobPosting as deleteJobService,
     toggleJobPublishStatus as togglePublishService,
     getJobPostings as getPostingsService,
-    getJobPostingDetail as getPostingDetailService
+    getTotalJobs as getTotalJobsService,
+    getJobPostingDetail as getPostingDetailService,
 } from '@/services/job.service';
+
+import { getTestsByJobId } from '@/services/test.service';
 
 export class JobController {
     async updateJobPosting(req: Request, res: Response) {
@@ -146,24 +149,46 @@ export class JobController {
             });
 
             if (!updatedJob) {
-                return res.status(404).json({ message: "Job posting not found." });
+                return res.status(404).json({ message: 'Job posting not found.' });
             }
 
-            res.status(200).json({ message: "Job posting updated successfully.", updatedJob });
+            res
+                .status(200)
+                .json({ message: 'Job posting updated successfully.', updatedJob });
         } catch (error) {
-            console.error("Update error:", error);
-            res.status(500).json({ message: "Failed to update job posting.", error: error instanceof Error ? error.message : 'Unknown error' });
+            console.error('Update error:', error);
+            res
+                .status(500)
+                .json({
+                    message: 'Failed to update job posting.',
+                    error: error instanceof Error ? error.message : 'Unknown error',
+                });
         }
     }
 
     async createJobPosting(req: Request, res: Response) {
         try {
-            const jobData = req.body;
+            const jobData = {
+                ...req.body,
+                admin_id: parseInt(req.body.admin_id, 10),
+                salary: parseFloat(req.body.salary),
+                expiry_date: new Date(req.body.expiry_date),
+                created_at: new Date(),
+                requires_test: req.body.requires_test === 'true',
+                remote_option: req.body.remote_option === 'true',
+                published: req.body.is_published === 'true',
+            };
+            delete jobData.is_published;
             const banner = req.file ? `/uploads/${req.file.filename}` : undefined;
             const job = await createJobService({ ...jobData, banner });
             return res.status(201).json(job);
         } catch (error) {
-            return res.status(500).json({ message: 'Failed to create job posting.', error: error instanceof Error ? error.message : 'Unknown error' });
+            return res
+                .status(500)
+                .json({
+                    message: 'Failed to create job posting.',
+                    error: error instanceof Error ? error.message : 'Unknown error',
+                });
         }
     }
 
@@ -172,9 +197,14 @@ export class JobController {
 
         try {
             await deleteJobService(Number(id));
-            return res.status(204).send(); 
+            return res.status(204).send();
         } catch (error) {
-            return res.status(500).json({ message: 'Failed to delete job posting.', error: error instanceof Error ? error.message : 'Unknown error' });
+            return res
+                .status(500)
+                .json({
+                    message: 'Failed to delete job posting.',
+                    error: error instanceof Error ? error.message : 'Unknown error',
+                });
         }
     }
 
@@ -186,20 +216,45 @@ export class JobController {
             const updatedJob = await togglePublishService(Number(id), published);
             return res.status(200).json(updatedJob);
         } catch (error) {
-            return res.status(500).json({ message: 'Failed to toggle publish status.', error: error instanceof Error ? error.message : 'Unknown error' });
+            return res
+                .status(500)
+                .json({
+                    message: 'Failed to toggle publish status.',
+                    error: error instanceof Error ? error.message : 'Unknown error',
+                });
         }
     }
 
     async getJobPostings(req: Request, res: Response) {
         try {
-            const jobs = await getPostingsService(req.query as any);
-            const jobsWithApplicantCount = jobs.map(job => ({
+            const { page = 1, limit = 10 } = req.query;
+            // Konversi ke angka
+            const pageNum = parseInt(page as string);
+            const limitNum = parseInt(limit as string);
+            const offset = (pageNum - 1) * limitNum;
+
+            const jobs = await getPostingsService({...req.query, offset, limit:limitNum});
+            const jobsWithApplicantCount = jobs.map((job) => ({
                 ...job,
                 applicantCount: job.applicant.length,
             }));
-            return res.status(200).json(jobsWithApplicantCount);
+            const totalItems = await getTotalJobsService(req.query);
+            return res.status(200).json({
+                data:jobsWithApplicantCount,
+                pagination: {
+                    totalItems,
+                    totalPages: Math.ceil(totalItems / limitNum),
+                    currentPage: pageNum,
+                    pageSize: limitNum,
+                },
+            });
         } catch (error) {
-            return res.status(500).json({ message: 'Failed to fetch job postings.', error: error instanceof Error ? error.message : 'Unknown error' });
+            return res
+                .status(500)
+                .json({
+                    message: 'Failed to fetch job postings.',
+                    error: error instanceof Error ? error.message : 'Unknown error',
+                });
         }
     }
 
@@ -208,10 +263,36 @@ export class JobController {
 
         try {
             const job = await getPostingDetailService(Number(id));
-            if (!job) return res.status(404).json({ message: 'Job posting not found.' });
+            if (!job)
+                return res.status(404).json({ message: 'Job posting not found.' });
             return res.status(200).json(job);
         } catch (error) {
-            return res.status(500).json({ message: 'Failed to fetch job details.', error: error instanceof Error ? error.message : 'Unknown error' });
+            return res
+                .status(500)
+                .json({
+                    message: 'Failed to fetch job details.',
+                    error: error instanceof Error ? error.message : 'Unknown error',
+                });
+        }
+    }
+
+    async getJobPostingTest(req: Request, res: Response) {
+        const { id } = req.params;
+
+        try {
+            const job = await getPostingDetailService(Number(id));
+            if (!job)
+                return res.status(404).json({ message: 'Job posting not found.' });
+
+            const test = await getTestsByJobId(Number(job.id));
+            return res.status(200).json(test);
+        } catch (error) {
+            return res
+                .status(500)
+                .json({
+                    message: 'Failed to fetch job details.',
+                    error: error instanceof Error ? error.message : 'Unknown error',
+                });
         }
     }
 }
