@@ -80,8 +80,8 @@ import { PrismaClient } from '@prisma/client';
         offset?: number;
         limit?: number;
     }) => {
-      const { title, category, sortField, sortOrder, offset = 0, limit = 10 } = query;
-      console.log(title);
+      const { title, category, sortField='created_at', sortOrder='asc', offset = 0, limit = 10 } = query;
+      // console.log(sortField, sortOrder);
 
       return await prisma.job.findMany({
         skip: offset,
@@ -90,7 +90,9 @@ import { PrismaClient } from '@prisma/client';
           title: title ? { contains: title } : undefined,
           category: category ? { contains: category } : undefined,
         },
-        orderBy: sortField ? { [sortField]: sortOrder ?? 'asc' } : undefined,
+        orderBy: {
+          [sortField]: sortOrder,
+        },
         include: {
           applicant: true, // Be cautious with large data sets
         },
