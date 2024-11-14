@@ -90,7 +90,6 @@ export function DataTable<TData, TValue>({
 
     React.useEffect(() => {
         hiddenColumns && table.setColumnVisibility(hideColunms(hiddenColumns));
-        console.log(table.getState().sorting);
       }, [hiddenColumns, table]);
     
     React.useEffect(() => {
@@ -103,7 +102,6 @@ export function DataTable<TData, TValue>({
         fetch(`http://localhost:8000/api/jobs?page=${pagination.pageIndex + 1}&limit=${pagination.pageSize}${filterQuery ? `&${filterQuery}` : ''}${sortQuery ? `&${sortQuery}` : ''}`)
             .then(response => response.json())
             .then(data => {
-                console.log(data.data);
                 setDataState(data.data);
                 setTotalState(data.pagination.totalItems);
             });

@@ -16,20 +16,6 @@ const JobPostings = () => {
         pageSize: 10
     });
 
-    useEffect(() => {
-        console.log('Fetching job postings...');
-        fetch('http://localhost:8000/api/jobs?page=1&limit=10')
-            .then(response => response.json())
-            .then(data => {
-                setData(data.data);
-                setTotalItems(data.pagination.totalItems);
-            });
-    }, []);
-
-    // useEffect(() => {
-    //     console.log('need to feetch again');
-    // }, [pagination]);
-    
     return (
         <DashboardLayout>
             <div className="container mx-auto p-6">
