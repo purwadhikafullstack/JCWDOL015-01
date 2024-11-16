@@ -23,7 +23,7 @@ export class TestRouter {
         this.router.put('/link', this.testController.linkTestToJobApplication);
 
         // Route for submitting a pre-selection test (can be accessed by all)
-        this.router.post('/submit', this.testController.submitPreSelectionTest);
+        this.router.post('/:testId/submit', this.testController.submitPreSelectionTest);
 
         // Route for getting a specific test by ID (can be accessed by all)
         this.router.get('/:testId', this.testController.getTestById);

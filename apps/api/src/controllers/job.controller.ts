@@ -114,6 +114,7 @@ import {
 } from '@/services/job.service';
 
 import { getTestsByJobId } from '@/services/test.service';
+import { checkApplicant, createApplicant } from '@/services/applicant.service';
 
 export class JobController {
     async updateJobPosting(req: Request, res: Response) {
@@ -290,6 +291,40 @@ export class JobController {
                 .status(500)
                 .json({
                     message: 'Failed to fetch job details.',
+                    error: error instanceof Error ? error.message : 'Unknown error',
+                });
+        }
+    }
+
+    async applyForJob(req: Request, res: Response) {
+        const { id } = req.params;
+
+        try {
+            const job = await getPostingDetailService(Number(id));
+            if (!job)
+                return res.status(404).json({ message: 'Job posting not found.' });
+
+            if(job.expiry_date < new Date()) {
+                return res.status(400).json({ message: 'Job posting has expired.' });
+            }
+
+            if(job.published === false) {
+                return res.status(400).json({ message: 'Job posting is not published.' });
+            }
+
+            if(job.requires_test === true) {
+                return res.status(400).json({ message: 'Job posting requires a test.' });
+            }
+
+            const { userId } = req.body;
+            
+            const applicant = await createApplicant(userId, id);            
+            return res.status(201).json(applicant);
+        } catch (error) {
+            return res
+                .status(500)
+                .json({
+                    message: 'Failed to apply for job.',
                     error: error instanceof Error ? error.message : 'Unknown error',
                 });
         }

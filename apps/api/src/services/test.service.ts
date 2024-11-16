@@ -293,15 +293,60 @@ export const linkTestToJobApplication = async (jobId: number, testId: number) =>
 };
 
 // Service to submit the result of a pre-selection test
-export const submitPreSelectionTest = async (applicantId: number, testId: number, score: number) => {
-    return await prisma.result.create({
-        data: {
-            applicant_id: applicantId,
-            test_id: testId,
-            score,
-            completed_at: new Date(), // Adding the date when the test was completed
+export const submitPreSelectionTest = async (requestBody: any, testId: string, applicantId: number) => {
+
+    const test = await prisma.test.findUnique({
+        where: { id: Number(testId) },
+        include: {
+            questions: {
+                include: { choices: true }, // Include choices for each question
+            },
         },
     });
+    
+    // reformat the test to be an answer sheet
+    const answerSheet = test?.questions.reduce((acc, question) => {
+        const correctChoice = question.choices.find((choice) => choice.is_correct);
+        acc[question.id] = correctChoice ? correctChoice.choice_text : {};
+        return acc;
+    }, {} as Record<number, string | {}>);
+
+    let correctCount = 0;
+    let incorrectCount = 0;
+    if (answerSheet) {
+        Object.keys(answerSheet).forEach((questionId: string) => {
+            if (answerSheet[Number(questionId)] === requestBody.answers[Number(questionId)]) {
+                correctCount++;
+            } else {
+                incorrectCount++;
+            }
+        });
+    }
+    
+    if (answerSheet) {
+        const totalQuestions = Object.keys(answerSheet).length;
+        const score = (correctCount / totalQuestions) * 100;
+        console.log(`Correct answers: ${correctCount}, Incorrect answers: ${incorrectCount}, Score: ${score}%`);
+
+        return await prisma.result.create({
+            data: {
+                test_id: Number(testId),
+                applicant_id: applicantId,
+                score,
+                passed: score >= 50,
+                completed_at: new Date(), // Adding the date when the test was completed
+            },
+        });
+    } else {
+        throw new Error('Answer sheet not found');
+    }
+    
+    //         applicant_id: applicantId,
+    //         test_id: testId,
+    //         score,
+    //         completed_at: new Date(), // Adding the date when the test was completed
+    //     },
+    // });
 };
 
 // Service to get all test results for a specific test by testId
@@ -329,5 +374,13 @@ export const getTestById = async (testId: number) => {
                 include: { choices: true }, // Include choices for each question
             },
         },
+    });
+};
+
+// get Job by testId
+export const getJobByTestId = async (testId: number) => {
+    return await prisma.test.findUnique({
+        where: { id: testId },
+        include: { job: true },
     });
 };

@@ -30,5 +30,8 @@ router.get('/:id', jobController.getJobPostingDetail.bind(jobController));
 // Route for getting test job posting
 router.get('/:id/test', jobController.getJobPostingTest.bind(jobController));
 
+// Route for applying for a job
+router.post('/:id/apply', jobController.applyForJob.bind(jobController));
+
 // Export the router to use in your main app file
 export default router;

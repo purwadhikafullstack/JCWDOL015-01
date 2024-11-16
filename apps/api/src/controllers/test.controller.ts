@@ -102,6 +102,7 @@ import prisma from "@/prisma";
 
 import { Request, Response } from 'express';
 import * as testService from '@/services/test.service';
+import { checkApplicant, createApplicant } from "@/services/applicant.service";
 
 export class TestController {
     public async createPreSelectionTest(req: Request, res: Response): Promise<void> {
@@ -136,13 +137,31 @@ export class TestController {
     }
 
     public async submitPreSelectionTest(req: Request, res: Response): Promise<void> {
+        const job = await testService.getJobByTestId(Number(req.params.testId));
+
+        if(!job) {
+            res.status(404).json({ message: 'Job not found' });
+            return
+        }
+            
+
+        // check if user already applied
+        if (job?.id) {
+            const existingApplicants = await checkApplicant(req.body.userId, req.params.testId);
+            if (existingApplicants !== null) {
+                res.status(400).json({ message: 'User already applied for this job' });
+                return
+            }
+        }
+
         try {
-            const { applicantId, testId, score } = req.body;
-            const result = await testService.submitPreSelectionTest(applicantId, testId, score);
+            const applicant = await createApplicant(req.body.userId, job.id.toString());
+            const result = await testService.submitPreSelectionTest(req.body, req.params.testId, applicant.id);
             res.status(201).json(result);
         } catch (error) {
             res.status(500).json({ message: 'Error submitting test', error });
         }
+    
     }
 
     public async getTestResults(req: Request, res: Response): Promise<void> {

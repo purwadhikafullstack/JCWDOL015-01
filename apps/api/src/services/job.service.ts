@@ -75,20 +75,21 @@ import { PrismaClient } from '@prisma/client';
     export const getJobPostings = async (query: {
         title?: string;
         category?: string;
+        published?: boolean;
         sortField?: string;
         sortOrder?: 'asc' | 'desc';
         offset?: number;
         limit?: number;
     }) => {
-      const { title, category, sortField='created_at', sortOrder='asc', offset = 0, limit = 10 } = query;
-      // console.log(sortField, sortOrder);
-
+      const { title, category, published, sortField='created_at', sortOrder='asc', offset = 0, limit = 10 } = query;
+      
       return await prisma.job.findMany({
         skip: offset,
         take: limit,
         where: {
           title: title ? { contains: title } : undefined,
           category: category ? { contains: category } : undefined,
+          published: published ? { equals: Boolean(published) } : undefined,
         },
         orderBy: {
           [sortField]: sortOrder,
@@ -102,13 +103,15 @@ import { PrismaClient } from '@prisma/client';
     export const getTotalJobs = async (query: {
         title?: string;
         category?: string;
+        published?: boolean;
     }) => {
-      const { title, category } = query;
+      const { title, category, published } = query;
 
       return await prisma.job.count({
         where: {
           title: title ? { contains: title } : undefined,
           category: category ? { contains: category } : undefined,
+          published: published ? { equals: Boolean(published) } : undefined,
         },
       });
     };

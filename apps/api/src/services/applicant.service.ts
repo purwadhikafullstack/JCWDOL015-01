@@ -169,6 +169,7 @@
 // };
 
 import { PrismaClient } from '@prisma/client';
+import e from 'express';
 
 const prisma = new PrismaClient();
 
@@ -296,4 +297,52 @@ export const getApplicantTestResults = async () => {
   return await prisma.result.findMany({
     include: { applicant: true },
   });
+};
+
+
+export const checkApplicant = async (userId: number, testId: string) => { 
+  // get jobId from testId
+  const job = await prisma.test.findUnique({
+    where: { id: Number(testId) },
+    select: { job_id: true },
+  })
+
+  if (!job) {
+    throw new Error("Job not found");
+  }
+
+  // check if user has already applied for this job
+  const existingApplicant = await prisma.applicant.findFirst({
+    where: { job_posting_id: job.job_id, user_id: Number(userId) },
+  });
+
+  return existingApplicant
+}
+
+export const createApplicant = async (userId: number, jobId: string) => {
+  // get job using jobId
+  const job = await prisma.job.findUnique({
+    where: { id: Number(jobId) },
+  })
+
+  if (!job) {
+    throw new Error("Job not found");
+  }
+
+  // check if user has already applied for this job
+  const existingApplicant = await prisma.applicant.findFirst({
+    where: { job_posting_id: job.id, user_id: Number(userId) },
+  });
+
+  if (existingApplicant) {
+    throw new Error("User has already applied for this job");
+  }
+
+  const data = {
+    job_posting_id: job.id,
+    user_id: Number(userId),
+    applied_at: new Date(),
+  }
+
+  return await prisma.applicant.create({ data });
 };

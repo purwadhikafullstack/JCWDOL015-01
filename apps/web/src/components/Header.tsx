@@ -5,6 +5,9 @@ export const Header = () => {
     <header style={styles.header}>
       <div style={styles.logo}>On To Work</div>
       <nav style={styles.nav}>
+        <Link href="/jobs" style={styles.link}>Jobs</Link>
+      </nav>
+      <nav style={styles.nav}>
         <Link href="/dashboard" style={styles.link}>Dashboard</Link>
       </nav>
     </header>
