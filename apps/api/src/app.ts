@@ -3,7 +3,7 @@ import './types/custom';
 import express, { json, urlencoded, Express, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import { PORT } from './config';
-// import { TestRouter } from './routers/test.router';
+import analyticsRouter from './routers/analytics.router';
 import jobRouter from './routers/job.router';
 import applicantRouter from './routers/applicant.router'; 
 import { TestRouter } from './routers/test.router';
@@ -61,6 +61,7 @@ export default class App {
     this.app.use('/api/jobs', jobRouter); 
     this.app.use('/api/interviews', interviewRouter);
     this.app.use('/api/applications', applicationRouter);
+    this.app.use('/api/analytics', analyticsRouter);
   }
 
   public start(): void {

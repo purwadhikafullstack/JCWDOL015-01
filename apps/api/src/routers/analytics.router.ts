@@ -1,16 +1,19 @@
 import express from "express";
 import {
-  getUserDemographicsController,
+  getJobInterestController,
   getSalaryTrendsController,
-  getApplicantInterestsController,
-  addUserInterestController,
+  getUserAgeController,
+  getUserGenderController,
+  getUserLocationController,
 } from "../controllers/analytics.controller";
 
 const router = express.Router();
 
-router.get("/demographics", getUserDemographicsController);
+router.get("/age-distribution", getUserAgeController);
+router.get("/gender-distribution", getUserGenderController);
+router.get("/location-distribution", getUserLocationController);
 router.get("/salary-trends", getSalaryTrendsController);
-router.get("/applicant-interests", getApplicantInterestsController);
-router.post("/user/:userId/interest", addUserInterestController);
+router.get("/job-interests", getJobInterestController);
+// router.post("/user/:userId/interest", addUserInterestController);
 
 export default router;
