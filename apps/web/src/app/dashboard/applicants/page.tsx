@@ -482,7 +482,7 @@ type Applicant = {
     profile_picture_url: string;
     birth_date: string;
   };
-  expectedSalary: number;
+  expected_salary: number;
   cv_url: string;
   applied_at: string;
   status: string;
@@ -494,7 +494,7 @@ const ApplicantList = () => {
   const [filters, setFilters] = useState({
     name: '',
     age: '',
-    expectedSalary: '',
+    expected_salary: '',
     education: '',
   });
   const [loading, setLoading] = useState(false);
@@ -543,7 +543,7 @@ const ApplicantList = () => {
         (filters.name === '' || applicant.user.name.toLowerCase().includes(filters.name.toLowerCase())) &&
         (filters.age === '' || age.toString() === filters.age) &&
         (filters.education === '' || applicant.user.education.toLowerCase().includes(filters.education.toLowerCase())) &&
-        (filters.expectedSalary === '' || (applicant.job.salary && applicant.job.salary.toString().includes(filters.expectedSalary.toString())))
+        (filters.expected_salary === '' || (applicant.expected_salary && applicant.expected_salary.toString().includes(filters.expected_salary.toString())))
       );
     });
     setFilteredApplicants(filtered);
@@ -579,8 +579,8 @@ const ApplicantList = () => {
           />
           <input
             type="number"
-            name="expectedSalary"
-            value={filters.expectedSalary}
+            name="expected_salary"
+            value={filters.expected_salary}
             placeholder="Filter by Expected Salary"
             onChange={handleFilterChange}
             className="border p-2 rounded"
@@ -595,11 +595,13 @@ const ApplicantList = () => {
           <table className="min-w-full border-collapse">
           <thead>
             <tr className="bg-gray-100">
+              <th className="px-4 py-2 border-b">Job Title</th>
               <th className="px-4 py-2 border-b">Name</th>
               <th className="px-4 py-2 border-b">Age</th>
               <th className="px-4 py-2 border-b">Education</th>
               <th className="px-4 py-2 border-b">Expected Salary</th>
               <th className="px-4 py-2 border-b">CV</th>
+              <th className="px-4 py-2 border-b">Status</th>
               <th className="px-4 py-2 border-b">Actions</th>
             </tr>
           </thead>
@@ -608,7 +610,7 @@ const ApplicantList = () => {
               const age = calculateAge(applicant.user.birth_date);
               const handleAction = async (id: number, action: string) => {
                 try {
-                  const response = await fetch(`/api/applicants/${id}/${action}`, {
+                  const response = await fetch(`http://localhost:8000/api/applicants/${id}/${action}/${applicant.job.id}`, {
                     method: 'PUT',
                   });
                   if (response.ok) {
@@ -622,6 +624,7 @@ const ApplicantList = () => {
 
               return (
                 <tr key={applicant.id}>
+                  <td className="px-4 py-2 border-b">{applicant.job.title}</td>
                   <td className="px-4 py-2 border-b flex items-center space-x-2">
                     <img src={applicant.user.profile_picture_url} alt="Profile" className="h-10 w-10 rounded-full" />
                     <Link href={`/dashboard/applicants/${applicant.id}`} className="text-blue-500 hover:underline">
@@ -630,7 +633,12 @@ const ApplicantList = () => {
                   </td>
                   <td className="px-4 py-2 border-b">{age}</td>
                   <td className="px-4 py-2 border-b">{applicant.user.education}</td>
-                  <td className="px-4 py-2 border-b">{formatCurrency(applicant.job.salary ?? 0)}</td>
+                  <td className="px-4 py-2 border-b">{formatCurrency(applicant.expected_salary ?? 0)}</td>
+                  <td className='px-4 py-2 border-b'>
+                    <label className={`whitespace-nowrap text-${applicant.status === 'accepted' ? 'green-500' : applicant.status === 'rejected' ? 'red-500' : applicant.status === 'interview' ? 'yellow-500' : 'gray-500'}`}>
+                      {applicant.status.replace('_', ' ').toUpperCase()}
+                    </label>
+                  </td>
                   <td className="px-4 py-2 border-b">
                     <button
                       onClick={() => window.open(applicant.cv_url, '_blank')}

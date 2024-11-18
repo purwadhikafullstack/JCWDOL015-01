@@ -28,7 +28,7 @@ router.put('/:id/accept/:jobId', acceptApplicantController);
 router.put('/:id/reject/:jobId', rejectApplicantController);
 
 // Route to in_proccess an applicant
-router.put('/:id/in_proccess/:jobId', inProcessApplicantController);
+router.put('/:id/in_process/:jobId', inProcessApplicantController);
 
 // Route to interview an applicant
 router.put('/:id/interview/:jobId', interviewApplicantController);

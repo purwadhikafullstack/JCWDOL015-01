@@ -40,42 +40,42 @@
 //   });
 // };
 
-// // Accept an applicant (update their application status)
+// // Accept an applicant (update their applicant status)
 // export const acceptApplicant = async (applicantId: number, jobId: number) => {
-//   const application = await prisma.application.findFirst({
+//   const applicant = await prisma.applicant.findFirst({
 //     where: {
 //       user_id: applicantId,
 //       job_id: jobId,
 //     },
 //   });
 
-//   if (application) {
-//     return await prisma.application.update({
-//       where: { id: application.id },
+//   if (applicant) {
+//     return await prisma.applicant.update({
+//       where: { id: applicant.id },
 //       data: { status: 'accepted' }, // Update the status to accepted
 //     });
 //   }
 
-//   throw new Error("Application not found for this applicant and job posting");
+//   throw new Error("applicant not found for this applicant and job posting");
 // };
 
-// // Reject an applicant (update their application status)
+// // Reject an applicant (update their applicant status)
 // export const rejectApplicant = async (applicantId: number, jobId: number) => {
-//   const application = await prisma.application.findFirst({
+//   const applicant = await prisma.applicant.findFirst({
 //     where: {
 //       user_id: applicantId,
 //       job_id: jobId,
 //     },
 //   });
 
-//   if (application) {
-//     return await prisma.application.update({
-//       where: { id: application.id },
+//   if (applicant) {
+//     return await prisma.applicant.update({
+//       where: { id: applicant.id },
 //       data: { status: 'rejected' }, // Update the status to rejected
 //     });
 //   }
 
-//   throw new Error("Application not found for this applicant and job posting");
+//   throw new Error("applicant not found for this applicant and job posting");
 // };
 
 // import { PrismaClient } from '@prisma/client';
@@ -93,7 +93,7 @@
 // export const getApplicantsByJobPosting = async (jobId: number, filters: any) => {
 //   const { name, salary, education } = filters;
 
-//   return await prisma.application.findMany({
+//   return await prisma.applicant.findMany({
 //     where: {
 //       job_id: jobId,
 //       expected_salary: salary ? { gte: parseFloat(salary) } : undefined,
@@ -123,42 +123,42 @@
 //   });
 // };
 
-// // Accept an applicant (update their application status)
+// // Accept an applicant (update their applicant status)
 // export const acceptApplicant = async (applicantId: number, jobId: number) => {
-//   const application = await prisma.application.findFirst({
+//   const applicant = await prisma.applicant.findFirst({
 //     where: {
 //       user_id: applicantId,
 //       job_id: jobId,
 //     },
 //   });
 
-//   if (application) {
-//     return await prisma.application.update({
-//       where: { id: application.id },
+//   if (applicant) {
+//     return await prisma.applicant.update({
+//       where: { id: applicant.id },
 //       data: { status: 'accepted' }, // Update the status to accepted
 //     });
 //   }
 
-//   throw new Error("Application not found for this applicant and job posting");
+//   throw new Error("applicant not found for this applicant and job posting");
 // };
 
-// // Reject an applicant (update their application status)
+// // Reject an applicant (update their applicant status)
 // export const rejectApplicant = async (applicantId: number, jobId: number) => {
-//   const application = await prisma.application.findFirst({
+//   const applicant = await prisma.applicant.findFirst({
 //     where: {
 //       user_id: applicantId,
 //       job_id: jobId,
 //     },
 //   });
 
-//   if (application) {
-//     return await prisma.application.update({
-//       where: { id: application.id },
+//   if (applicant) {
+//     return await prisma.applicant.update({
+//       where: { id: applicant.id },
 //       data: { status: 'rejected' }, // Update the status to rejected
 //     });
 //   }
 
-//   throw new Error("Application not found for this applicant and job posting");
+//   throw new Error("applicant not found for this applicant and job posting");
 // };
 
 // // Fetch test results for all applicants
@@ -184,9 +184,9 @@ export const getAllApplicants = async () => {
 export const getApplicantsByJobPosting = async (jobId: number, filters: any) => {
   const { name, salary, education } = filters;
 
-  return await prisma.application.findMany({
+  return await prisma.applicant.findMany({
     where: {
-      job_id: jobId,
+      job_posting_id: jobId,
       expected_salary: salary ? { gte: parseFloat(salary) } : undefined,
       user: {
         name: name ? { contains: name } : undefined,
@@ -214,80 +214,81 @@ export const getApplicantById = async (id: number) => {
   });
 };
 
-// Accept an applicant (update their application status)
+// Accept an applicant (update their applicant status)
 export const acceptApplicant = async (applicantId: number, jobId: number) => {
-  const application = await prisma.application.findFirst({
+  const applicant = await prisma.applicant.findFirst({
     where: {
-      user_id: applicantId,
-      job_id: jobId,
+      id: applicantId,
+      job_posting_id: jobId,
     },
   });
 
-  if (application) {
-    return await prisma.application.update({
-      where: { id: application.id },
+  if (applicant) {
+    return await prisma.applicant.update({
+      where: { id: applicant.id },
       data: { status: 'accepted' }, // Update the status to accepted
     });
   }
 
-  throw new Error("Application not found for this applicant and job posting");
+  throw new Error("applicant not found for this applicant and job posting");
 };
 
-// Reject an applicant (update their application status)
+// Reject an applicant (update their applicant status)
 export const rejectApplicant = async (applicantId: number, jobId: number) => {
-  const application = await prisma.application.findFirst({
+  const applicant = await prisma.applicant.findFirst({
     where: {
-      user_id: applicantId,
-      job_id: jobId,
+      id: applicantId,
+      job_posting_id: jobId,
     },
   });
 
-  if (application) {
-    return await prisma.application.update({
-      where: { id: application.id },
+  if (applicant) {
+    return await prisma.applicant.update({
+      where: { id: applicant.id },
       data: { status: 'rejected' }, // Update the status to rejected
     });
   }
 
-  throw new Error("Application not found for this applicant and job posting");
+  throw new Error("applicant not found for this applicant and job posting");
 };
 
-// Mark an applicant as in process (update their application status)
+// Mark an applicant as in process (update their applicant status)
 export const inProcessApplicant = async (applicantId: number, jobId: number) => {
-  const application = await prisma.application.findFirst({
+
+  const applicant = await prisma.applicant.findFirst({
     where: {
-      user_id: applicantId,
-      job_id: jobId,
+      id: applicantId,
+      job_posting_id: jobId,
     },
   });
 
-  if (application) {
-    return await prisma.application.update({
-      where: { id: application.id },
-      data: { status: 'pending' }, // Update the status to in process
+  if (applicant) {
+    return await prisma.applicant.update({
+      where: { id: applicant.id },
+      data: { status: 'in_process' }, // Update the status to in process
     });
   }
 
-  throw new Error("Application not found for this applicant and job posting");
+  throw new Error("applicant not found for this applicant and job posting");
 };
 
-// Interview an applicant (update their application status)
+// Interview an applicant (update their applicant status)
 export const interviewApplicant = async (applicantId: number, jobId: number) => {
-  const application = await prisma.application.findFirst({
+  const applicant = await prisma.applicant.findFirst({
     where: {
-      user_id: applicantId,
-      job_id: jobId,
+      id: applicantId,
+      job_posting_id: jobId,
     },
   });
 
-  if (application) {
-    return await prisma.application.update({
-      where: { id: application.id },
+  if (applicant) {
+    return await prisma.applicant.update({
+      where: { id: applicant.id },
       data: { status: 'interview' }, // Update the status to interview
     });
   }
 
-  throw new Error("Application not found for this applicant and job posting");
+  throw new Error("applicant not found for this applicant and job posting");
 };
 
 

@@ -85,7 +85,7 @@ export const createSchedule = async (input: CreateScheduleInput): Promise<Interv
 
   const schedule = await prisma.interviewSchedule.create({
     data: {
-      application_id,
+      applicant_id: application_id,
       date_time,
       location,
       status,
@@ -93,7 +93,7 @@ export const createSchedule = async (input: CreateScheduleInput): Promise<Interv
   });
 
   // Implement the email notification logic
-  await sendEmailNotification(schedule.application_id);
+  await sendEmailNotification(schedule.applicant_id);
 
   return schedule;
 };
@@ -102,7 +102,7 @@ export const createSchedule = async (input: CreateScheduleInput): Promise<Interv
 export const getSchedules = async (): Promise<InterviewSchedule[]> => {
   return await prisma.interviewSchedule.findMany({
     include: {
-      application: {
+      applicant: {
         include: {
           user: true, // Include user details if needed
         },
@@ -141,7 +141,7 @@ export const sendEmailNotification = async (applicationId: number) => {
 
   // Fetch the latest interview schedule for this application
   const interviewSchedule = await prisma.interviewSchedule.findFirst({
-    where: { application_id: applicationId },
+    where: { applicant_id: applicationId },
     orderBy: { date_time: 'asc' }, // Get the earliest scheduled interview
   });
   

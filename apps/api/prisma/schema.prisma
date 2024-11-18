@@ -124,8 +124,6 @@ model Application {
 
   job              Job      @relation(fields: [job_id], references: [id])
   user             User     @relation(fields: [user_id], references: [id]) 
-
-  interview_schedule InterviewSchedule[]
 }
 
 model SkillAssessment {
@@ -141,12 +139,12 @@ model SkillAssessment {
 
 model InterviewSchedule {
   id             Int       @id @default(autoincrement())
-  application_id  Int
+  applicant_id  Int
   date_time      DateTime
   location       String
   status         InterviewStatus
 
-  application    Application @relation(fields: [application_id], references: [id])
+  applicant    Applicant @relation(fields: [applicant_id], references: [id])
 }
 
 model Notifications {
@@ -223,6 +221,8 @@ model Applicant {
   applied_at        DateTime @default(now())
   cv_url            String? 
   expected_salary   Decimal? @db.Decimal(10, 2)
+  status            ApplicationStatus @default(pending)
+  interview_schedule InterviewSchedule[]
   job              Job      @relation(fields: [job_posting_id], references: [id])
   user             User     @relation(fields: [user_id], references: [id])
 

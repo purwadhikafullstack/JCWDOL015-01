@@ -1,5 +1,7 @@
 'use client'; 
 
+import DashboardLayout from '@/components/DashboardLayout';
+import { formatCurrency } from '@/utils/utils';
 import { useSearchParams } from 'next/navigation';  
 import { useEffect, useState } from 'react';
 
@@ -12,15 +14,17 @@ type ApplicantDetail = {
     profile_picture_url: string;
     birth_date: string;
   };
-  expectedSalary: number;
+  job: {
+    title: string;
+  }
+  expected_salary: number;
   cv_url: string;
   applied_at: string;
   status: string;
 };
 
-const ApplicantDetailPage = () => {
-  const searchParams = useSearchParams();
-  const id = searchParams.get('id');  
+const ApplicantDetailPage = ({ params }: { params: { id: string } }) => {
+  const id = params.id;
   const [applicant, setApplicant] = useState<ApplicantDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -35,6 +39,7 @@ const ApplicantDetailPage = () => {
         if (!response.ok) throw new Error('Failed to fetch applicant details');
         const data = await response.json();
         setApplicant(data);
+        setLoading(false);
       } catch (err) {
         setError('Failed to load applicant details');
       } finally {
@@ -49,21 +54,28 @@ const ApplicantDetailPage = () => {
   if (error) return <div className="text-red-500">{error}</div>;
 
   return (
-    <div className="p-6">
-      {applicant && (
-        <div>
-          <h1 className="text-2xl font-bold mb-4">{applicant.user.name}</h1>
-          <img src={applicant.user.profile_picture_url} alt="Profile" className="h-20 w-20 rounded-full mb-4" />
-          <p>Age: {applicant.user.age}</p>
-          <p>Education: {applicant.user.education}</p>
-          <p>Expected Salary: {applicant.expectedSalary}</p>
-          <p>Status: {applicant.status}</p>
-          <a href={applicant.cv_url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
-            View CV
-          </a>
+    <DashboardLayout>
+        <div className="p-4">
+          <h1 className="text-2xl font-bold mb-4">Applicant Detail</h1>
+          <div className="p-6">
+            {applicant && (
+              <div>
+                <h1 className="text-2xl font-bold mb-4">{applicant.user.name}</h1>
+                <img src={applicant.user.profile_picture_url} alt="Profile" className="h-20 w-20 rounded-full mb-4" />
+                <p>Age: {applicant.user.age}</p>
+                <p>Education: {applicant.user.education}</p>
+                <p>Applied At: {applicant.applied_at}</p>
+                <p>Job Title: {applicant.job.title}</p>
+                <p>Expected Salary: {formatCurrency(applicant.expected_salary)}</p>
+                <p>Status: {applicant.status}</p>
+                <a href={applicant.cv_url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                  View CV
+                </a>
+              </div>
+            )}
+          </div>
         </div>
-      )}
-    </div>
+    </DashboardLayout>
   );
 };
 
