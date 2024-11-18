@@ -1,5 +1,6 @@
 'use client';
 
+import { ApexOptions } from 'apexcharts';
 import dynamic from 'next/dynamic';
 import React, { useEffect, useState } from 'react';
 
@@ -8,9 +9,22 @@ const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
 const UserLocationChart = () => {
   const [chartData, setChartData] = useState({
-    options: {},
-      series: [],
-      labels: []
+    options: {
+      chart: {
+        type: 'donut',
+      },
+      title: {
+        text: 'Location Distribution', // Add your chart title here
+        align: 'center', // Align the title (left, center, right)
+        style: {
+          fontSize: '18px', // Title font size
+          fontWeight: 'bold', // Title font weight
+          color: '#333', // Title color
+        },
+      },
+    },
+    series: [],
+    labels: [],
   });
 
   const fetchData = () => {
@@ -30,9 +44,8 @@ const UserLocationChart = () => {
         .catch((error) => {
           console.error('Error fetching chart data:', error);
         });
-      
     } catch (error) {
-      console.error("Error fetching chart data:", error);
+      console.error('Error fetching chart data:', error);
     }
   };
 
@@ -42,7 +55,7 @@ const UserLocationChart = () => {
 
   return (
     <Chart
-      options={chartData.options}
+      options={chartData.options as ApexOptions}
       series={chartData.series}
       type="donut"
       width="320"

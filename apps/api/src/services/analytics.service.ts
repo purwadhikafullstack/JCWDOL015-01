@@ -49,7 +49,7 @@ export async function getUserLocationDistribution() {
       const locationCounts: Record<string, number> = {};
       users.forEach((user) => {
         // get city from address
-        const location = user.address.split(",")[user.address.split(",").length - 2];
+        const location = user.address;
         if (locationCounts[location]) {
           locationCounts[location] += 1;
         } else {
