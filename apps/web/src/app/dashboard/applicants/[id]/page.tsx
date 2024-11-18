@@ -53,6 +53,13 @@ const ApplicantDetailPage = ({ params }: { params: { id: string } }) => {
   if (loading) return <div>Loading...</div>;
   if (error) return <div className="text-red-500">{error}</div>;
 
+  const calculateAge = (birthDate: string) => {
+    const today = new Date();
+    const birthDateObj = new Date(birthDate);
+    const age = today.getFullYear() - birthDateObj.getFullYear();
+    return age;
+  };
+
   return (
     <DashboardLayout>
         <div className="p-4">
@@ -62,9 +69,9 @@ const ApplicantDetailPage = ({ params }: { params: { id: string } }) => {
               <div>
                 <h1 className="text-2xl font-bold mb-4">{applicant.user.name}</h1>
                 <img src={applicant.user.profile_picture_url} alt="Profile" className="h-20 w-20 rounded-full mb-4" />
-                <p>Age: {applicant.user.age}</p>
+                <p>Age: {calculateAge(applicant.user.birth_date)}</p>
                 <p>Education: {applicant.user.education}</p>
-                <p>Applied At: {applicant.applied_at}</p>
+                <p>Applied At: {new Date(applicant.applied_at).toLocaleString()}</p>
                 <p>Job Title: {applicant.job.title}</p>
                 <p>Expected Salary: {formatCurrency(applicant.expected_salary)}</p>
                 <p>Status: {applicant.status}</p>
