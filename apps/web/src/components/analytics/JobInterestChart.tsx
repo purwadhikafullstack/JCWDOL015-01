@@ -1,9 +1,10 @@
 'use client';
 
-import { use } from 'chai';
+import dynamic from 'next/dynamic';
 import React, { useEffect, useState } from 'react';
 
-import Chart from 'react-apexcharts';
+// Dynamically import react-apexcharts without SSR
+const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
 const JobInterestdChart = () => {
   const [chartData, setChartData] = useState({

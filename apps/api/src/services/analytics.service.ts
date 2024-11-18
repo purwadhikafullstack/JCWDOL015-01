@@ -68,9 +68,9 @@ export async function getUserLocationDistribution() {
 // Fetch salary trends, e.g., average salary per location or job type
 export async function getSalaryTrends() {
   try {
-    const salaryTrends = await prisma.analytics.groupBy({
-      by: ["location"],
-      _avg: { salary: true },
+    const salaryTrends = await prisma.applicant.groupBy({
+      by: ["expected_salary"],
+      _count: { _all: true },
     });
     return salaryTrends;
   } catch (error) {

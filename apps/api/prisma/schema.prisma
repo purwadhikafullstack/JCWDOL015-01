@@ -222,6 +222,7 @@ model Applicant {
   user_id          Int 
   applied_at        DateTime @default(now())
   cv_url            String? 
+  expected_salary   Decimal? @db.Decimal(10, 2)
   job              Job      @relation(fields: [job_posting_id], references: [id])
   user             User     @relation(fields: [user_id], references: [id])
 

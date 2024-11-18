@@ -1,15 +1,37 @@
 'use client';
 
-import { use } from 'chai';
+import { ApexOptions } from 'apexcharts';
+import dynamic from 'next/dynamic';
 import React, { useEffect, useState } from 'react';
 
-import Chart from 'react-apexcharts';
+// Dynamically import react-apexcharts without SSR
+const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
 const SalaryTrendChart = () => {
   const [chartData, setChartData] = useState({
-    options: {},
-      series: [],
-      labels: []
+    options: {
+      chart: {
+        type: 'line',
+        height: 350
+      },
+      xaxis: {
+        categories: [],
+      },
+      stroke: {
+        curve: 'smooth'
+      },
+      grid: {
+        borderColor: '#e7e7e7',
+        row: {
+          colors: ['#f3f3f3', 'transparent'],
+          opacity: 0.5
+        },
+      }
+    },
+    series: [{
+      name: 'Jumlah Pelamar',
+      data: []
+    }]
   });
 
   const fetchData = () => {
@@ -17,12 +39,28 @@ const SalaryTrendChart = () => {
       fetch('http://localhost:8000/api/analytics/salary-trends')
         .then((response) => response.json())
         .then((data) => {
+          const maxValue = Math.max(...data.series);
+          const yAxisMax = Math.ceil(maxValue) + 1;
+          // const maxLabel = Math.max(...data.labels);
+          // const xAxisMax = Math.ceil(maxLabel) + 1000000;
+
           setChartData((prev) => ({
             ...prev,
-            series: data.series,
+            series: [{
+              name: 'Jumlah Pelamar',
+              data: data.series
+            }],
             options: {
               ...prev.options,
-              labels: data.labels,
+              yaxis: {
+                min: 0, // Start from 0
+                max: yAxisMax // Dynamically calculated maximum
+              },
+              xaxis: {
+                categories: data.labels,
+                // min: 0,
+                // max: xAxisMax
+              }
             },
           }));
         })
@@ -41,10 +79,10 @@ const SalaryTrendChart = () => {
 
   return (
     <Chart
-      options={chartData.options}
+      options={chartData.options as ApexOptions}
       series={chartData.series}
-      type="donut"
-      width="500"
+      type="line"
+      height={350}
     />
   );
 };

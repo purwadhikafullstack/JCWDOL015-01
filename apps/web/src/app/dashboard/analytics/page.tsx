@@ -4,6 +4,7 @@ import UserAgeChart from '@/components/analytics/UserAgeChart';
 import UserGenderChart from '@/components/analytics/UserGenderChart';
 import UserLocationChart from '@/components/analytics/UserLocationChart';
 import SalaryTrendChart from '@/components/analytics/SalaryTrendChart';
+import JobInterestdChart from '@/components/analytics/JobInterestChart';
 
 function Analytics() {
     
@@ -27,17 +28,18 @@ function Analytics() {
             <UserLocationChart />
           </div>
         </div>
+
+        <div className="text-2xl font-bold">Salary Trends</div>
+        <div className="flex">
+          <div className="flex-grow">
+            <SalaryTrendChart />
+          </div>
+        </div>
         
         <div className="text-2xl font-bold">Applicant Interest</div>
-        <div className="flex space-x-4">
-          <div className="w-1/3">
-            <canvas id="jobInterestChart"></canvas>
-          </div>
-          <div className="w-1/3">
-            <canvas id="industryInterestChart"></canvas>
-          </div>
-          <div className="w-1/3">
-            <canvas id="companyInterestChart"></canvas>
+        <div className="flex">
+          <div className="flex-grow">
+            <JobInterestdChart />
           </div>
         </div>
       </div>

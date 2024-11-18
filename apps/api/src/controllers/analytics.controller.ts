@@ -41,8 +41,8 @@ export async function getUserLocationController(req: Request, res: Response) {
 export async function getSalaryTrendsController(req: Request, res: Response) {
   try {
     const salaryTrends = await getSalaryTrends();
-    const labels = Object.keys(salaryTrends);
-    const series = Object.values(salaryTrends);
+    const labels = salaryTrends.map(item => item.expected_salary);
+    const series = salaryTrends.map(item => item._count._all);
     res.status(200).json({ labels, series });
   } catch (error) {
     console.error("Error fetching salary trends:", error);
@@ -53,8 +53,8 @@ export async function getSalaryTrendsController(req: Request, res: Response) {
 export async function getJobInterestController(req: Request, res: Response) {
   try {
     const jobInterest = await getJobInterest();
-    const labels = Object.keys(jobInterest);
-    const series = Object.values(jobInterest);
+    const labels = Object.values(jobInterest).map(item => item.category);
+    const series = Object.values(jobInterest).map(item => item.count);
     res.status(200).json({ labels, series });
   } catch (error) {
     console.error("Error fetching salary trends:", error);
