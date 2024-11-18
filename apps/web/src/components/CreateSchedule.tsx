@@ -101,13 +101,13 @@ function CreateSchedule({onSubmit}: any) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>Create Schedule</Button>
+        <Button>Buat Jadwal</Button>
       </DialogTrigger>
       <DialogContent aria-describedby="modal-content">
         <DialogHeader>
-          <DialogTitle>Create New Schedule</DialogTitle>
+          <DialogTitle>Buat Jadwal Baru</DialogTitle>
           <DialogDescription>
-            Fill out the form below to create a new schedule.
+            Isi formulir di bawah ini untuk membuat jadwal baru.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>

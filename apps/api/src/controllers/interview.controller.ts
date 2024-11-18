@@ -18,7 +18,7 @@ export class InterviewController {
     } catch (error: unknown) {
       console.error(error);
       return res.status(500).json({
-        message: 'Failed to create interview schedule.',
+        message: 'Gagal membuat jadwal wawancara.',
         error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
@@ -31,7 +31,7 @@ export class InterviewController {
     } catch (error: unknown) {
       console.error(error);
       return res.status(500).json({
-        message: 'Failed to fetch interview schedules.',
+        message: 'Gagal mengambil jadwal wawancara.',
         error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
@@ -44,7 +44,7 @@ export class InterviewController {
     } catch (error: unknown) {
       console.error(error);
       return res.status(500).json({
-        message: 'Failed to fetch interview schedules.',
+        message: 'Gagal mengambil jadwal wawancara.',
         error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
@@ -64,7 +64,7 @@ export class InterviewController {
     } catch (error: unknown) {
       console.error(error);
       return res.status(500).json({
-        message: 'Failed to update interview schedule.',
+        message: 'Gagal memperbarui jadwal wawancara.',
         error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
@@ -79,16 +79,16 @@ export class InterviewController {
     });
 
     if (!schedule) {
-      return res.status(404).json({ message: 'Interview schedule not found.' });
+      return res.status(404).json({ message: 'Jadwal wawancara tidak ditemukan.' });
     }
 
     try {
       await deleteScheduleService(Number(id));
-      return res.status(200).json({ message: 'Interview schedule deleted successfully.' });
+      return res.status(200).json({ message: 'Jadwal wawancara berhasil dihapus.' });
     } catch (error: unknown) {
       console.error(error);
       return res.status(500).json({
-        message: 'Failed to delete interview schedule.',
+        message: 'Gagal menghapus jadwal wawancara.',
         error: error instanceof Error ? error.message : 'Unknown error',
       });
     }

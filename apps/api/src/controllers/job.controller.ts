@@ -157,13 +157,13 @@ export class JobController {
 
             res
                 .status(200)
-                .json({ message: 'Job posting updated successfully.', updatedJob });
+                .json({ message: 'Postingan pekerjaan berhasil diperbarui.', updatedJob });
         } catch (error) {
             console.error('Update error:', error);
             res
                 .status(500)
                 .json({
-                    message: 'Failed to update job posting.',
+                    message: 'Gagal memperbarui postingan pekerjaan.',
                     error: error instanceof Error ? error.message : 'Unknown error',
                 });
         }
@@ -189,7 +189,7 @@ export class JobController {
             return res
                 .status(500)
                 .json({
-                    message: 'Failed to create job posting.',
+                    message: 'Gagal membuat postingan pekerjaan.',
                     error: error instanceof Error ? error.message : 'Unknown error',
                 });
         }
@@ -205,7 +205,7 @@ export class JobController {
             return res
                 .status(500)
                 .json({
-                    message: 'Failed to delete job posting.',
+                    message: 'Gagal menghapus postingan pekerjaan.',
                     error: error instanceof Error ? error.message : 'Unknown error',
                 });
         }
@@ -254,7 +254,7 @@ export class JobController {
             return res
                 .status(500)
                 .json({
-                    message: 'Failed to fetch job postings.',
+                    message: 'Gagal mengambil postingan pekerjaan.',
                     error: error instanceof Error ? error.message : 'Unknown error',
                 });
         }
@@ -272,7 +272,7 @@ export class JobController {
             return res
                 .status(500)
                 .json({
-                    message: 'Failed to fetch job details.',
+                    message: 'Gagal mengambil detail pekerjaan.',
                     error: error instanceof Error ? error.message : 'Unknown error',
                 });
         }
@@ -284,7 +284,7 @@ export class JobController {
         try {
             const job = await getPostingDetailService(Number(id));
             if (!job)
-                return res.status(404).json({ message: 'Job posting not found.' });
+                return res.status(404).json({ message: 'Postingan pekerjaan tidak ditemukan.' });
 
             const test = await getTestsByJobId(Number(job.id));
             return res.status(200).json(test);
@@ -292,7 +292,7 @@ export class JobController {
             return res
                 .status(500)
                 .json({
-                    message: 'Failed to fetch job details.',
+                    message: 'Gagal mengambil detail pekerjaan.',
                     error: error instanceof Error ? error.message : 'Unknown error',
                 });
         }
@@ -304,18 +304,18 @@ export class JobController {
         try {
             const job = await getPostingDetailService(Number(id));
             if (!job)
-                return res.status(404).json({ message: 'Job posting not found.' });
+                return res.status(404).json({ message: 'Postingan pekerjaan tidak ditemukan.' });
 
             if(job.expiry_date < new Date()) {
-                return res.status(400).json({ message: 'Job posting has expired.' });
+                return res.status(400).json({ message: 'Postingan pekerjaan telah kadaluarsa.' });
             }
 
             if(job.published === false) {
-                return res.status(400).json({ message: 'Job posting is not published.' });
+                return res.status(400).json({ message: 'Postingan pekerjaan tidak dipublikasikan.' });
             }
 
             if(job.requires_test === true) {
-                return res.status(400).json({ message: 'Job posting requires a test.' });
+                return res.status(400).json({ message: 'Postingan pekerjaan memerlukan tes.' });
             }
 
             const { userId } = req.body;
@@ -326,7 +326,7 @@ export class JobController {
             return res
                 .status(500)
                 .json({
-                    message: 'Failed to apply for job.',
+                    message: 'Gagal melamar pekerjaan.',
                     error: error instanceof Error ? error.message : 'Unknown error',
                 });
         }
