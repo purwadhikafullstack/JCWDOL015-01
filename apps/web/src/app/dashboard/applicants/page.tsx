@@ -634,11 +634,6 @@ const ApplicantList = () => {
                   <td className="px-4 py-2 border-b">{age}</td>
                   <td className="px-4 py-2 border-b">{applicant.user.education}</td>
                   <td className="px-4 py-2 border-b">{formatCurrency(applicant.expected_salary ?? 0)}</td>
-                  <td className='px-4 py-2 border-b'>
-                    <label className={`whitespace-nowrap text-${applicant.status === 'accepted' ? 'green-500' : applicant.status === 'rejected' ? 'red-500' : applicant.status === 'interview' ? 'yellow-500' : 'gray-500'}`}>
-                      {applicant.status.replace('_', ' ').toUpperCase()}
-                    </label>
-                  </td>
                   <td className="px-4 py-2 border-b">
                     <button
                       onClick={() => window.open(applicant.cv_url, '_blank')}
@@ -646,6 +641,12 @@ const ApplicantList = () => {
                     >
                       View CV
                     </button>
+                  </td>
+                  
+                  <td className='px-4 py-2 border-b'>
+                    <label className={`whitespace-nowrap text-${applicant.status === 'accepted' ? 'green-500' : applicant.status === 'rejected' ? 'red-500' : applicant.status === 'interview' ? 'yellow-500' : 'gray-500'}`}>
+                      {applicant.status.replace('_', ' ').toUpperCase()}
+                    </label>
                   </td>
                   <td className="px-4 py-2 border-b space-x-2">
                     <button
