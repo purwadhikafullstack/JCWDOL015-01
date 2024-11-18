@@ -73,7 +73,7 @@ import { InterviewSchedule, InterviewStatus } from '@prisma/client';
 
 // Input interface for creating a schedule
 interface CreateScheduleInput {
-  application_id: number;
+  applicant_id: number;
   date_time: Date;
   location: string;
   status: InterviewStatus; // Use the enum type directly
@@ -81,19 +81,19 @@ interface CreateScheduleInput {
 
 // Function to create a new interview schedule
 export const createSchedule = async (input: CreateScheduleInput): Promise<InterviewSchedule> => {
-  const { application_id, date_time, location, status } = input;
+  const { applicant_id, date_time, location, status } = input;
 
   const schedule = await prisma.interviewSchedule.create({
     data: {
-      applicant_id: application_id,
-      date_time,
-      location,
-      status,
+      applicant_id: applicant_id,
+      date_time: new Date(date_time),
+      location: location,
+      status: status ?? 'scheduled',
     },
   });
 
-  // Implement the email notification logic
-  await sendEmailNotification(schedule.applicant_id);
+  // // Implement the email notification logic
+  // await sendEmailNotification(schedule.applicant_id);
 
   return schedule;
 };
@@ -101,6 +101,20 @@ export const createSchedule = async (input: CreateScheduleInput): Promise<Interv
 // Function to retrieve all interview schedules
 export const getSchedules = async (): Promise<InterviewSchedule[]> => {
   return await prisma.interviewSchedule.findMany({
+    include: {
+      applicant: {
+        include: {
+          user: true, // Include user details if needed
+        },
+      },
+    },
+  });
+};
+
+// Function to retrieve interview schedules by id
+export const getSchedulesById = async (id: number): Promise<InterviewSchedule | null> => {
+  return await prisma.interviewSchedule.findUnique({
+    where: { id: id },
     include: {
       applicant: {
         include: {
@@ -119,7 +133,7 @@ export const updateSchedule = async (
   return await prisma.interviewSchedule.update({
     where: { id },
     data: {
-      ...(input.date_time && { date_time: input.date_time }),
+      ...(input.date_time && { date_time: new Date(input.date_time) }),
       ...(input.location && { location: input.location }),
       ...(input.status && { status: input.status as InterviewStatus }), // Cast to InterviewStatus
     },

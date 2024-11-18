@@ -174,9 +174,13 @@ import e from 'express';
 const prisma = new PrismaClient();
 
 // Fetch all applicants
-export const getAllApplicants = async () => {
+export const getAllApplicants = async (query: {
+  job_posting_id?: string;
+}) => {
+  console.log(query.job_posting_id);
   return await prisma.applicant.findMany({
     include: { user: true, job: true }, // Include related user and job data if necessary
+    where: { job_posting_id: Number(query.job_posting_id) },
   });
 };
 

@@ -20,6 +20,11 @@ router.get('/', asyncHandler(async (req: Request, res: Response) => {
   await interviewController.getSchedules(req, res);
 }));
 
+// Get interview schedules (GET)
+router.get('/:id', asyncHandler(async (req: Request, res: Response) => {
+  await interviewController.getSchedulesById(req, res);
+}));
+
 // Update interview schedule (PUT)
 router.put('/:id', asyncHandler(async (req: Request, res: Response) => {
   await interviewController.updateSchedule(req, res);

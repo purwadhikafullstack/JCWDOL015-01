@@ -66,7 +66,7 @@ import {
 
 export async function getAllApplicantsController(req: Request, res: Response): Promise<void> {
   try {
-    const applicants = await getAllApplicants();
+    const applicants = await getAllApplicants({...req.query});
     res.status(200).json(applicants);
   } catch (error) {
     console.error("Error fetching applicants:", error);
