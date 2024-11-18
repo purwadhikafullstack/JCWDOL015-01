@@ -180,7 +180,7 @@ export const getAllApplicants = async (query: {
   console.log(query.job_posting_id);
   return await prisma.applicant.findMany({
     include: { user: true, job: true }, // Include related user and job data if necessary
-    where: { job_posting_id: Number(query.job_posting_id) },
+    where: query.job_posting_id ? { job_posting_id: Number(query.job_posting_id) } : {},
   });
 };
 
