@@ -45,7 +45,7 @@ const UserGenderChart = () => {
       options={chartData.options}
       series={chartData.series}
       type="donut"
-      width="500"
+      width="320"
     />
   );
 };

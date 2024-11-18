@@ -15,16 +15,16 @@ function Analytics() {
         {/* Add your analytics content here */}
         <p>This is the Analytics page.</p>
 
-      <div className="flex flex-col space-y-4">
+      <div className="flex flex-col">
         <div className="text-2xl font-bold">User Demographics</div>
-        <div className="flex space-x-4">
-          <div className="w-1/3">
+        <div className="flex">
+          <div className="flex-grow">
             <UserAgeChart />
           </div>
-          <div className="w-1/3">
+          <div className="flex-grow">
             <UserGenderChart />
           </div>
-          <div className="w-1/3">
+          <div className="flex-grow">
             <UserLocationChart />
           </div>
         </div>
