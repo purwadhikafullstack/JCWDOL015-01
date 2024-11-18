@@ -166,6 +166,7 @@ const page = ({ params }: { params: { id: string } }) => {
 
       if (response.ok) {
         alert('Form submitted successfully!');
+        window.location.href = `/dashboard/job-postings/${job.id}`;
         // Optionally, clear the form or show a success message
         // setQuestions([]);
       } else {

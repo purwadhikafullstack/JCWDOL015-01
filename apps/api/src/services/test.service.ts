@@ -241,7 +241,7 @@ export const createPreSelectionTest = async (data: any) => {
             ...testData,
             questions: {
                 create: questions.map((question: any) => ({
-                    question_text: question.question_text,
+                    question_text: question.question_text.substring(0, 500),
                     choices: {
                         create: question.choices.map((choice: any) => ({
                             choice_text: choice.choice_text,
