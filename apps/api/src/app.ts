@@ -11,6 +11,9 @@ import cors from 'cors';
 import { PORT } from './config';
 import { UserRouter } from './routers/user.router';
 import { AdminRouter } from './routers/admin.router';
+import { JobRouter } from './routers/job.router';
+import { CompanyRouter } from './routers/company.router';
+import { ApplicationRouter } from './routers/application.router';
 
 export default class App {
   private app: Express;
@@ -54,6 +57,9 @@ export default class App {
   private routes(): void {
     const userRouter = new UserRouter();
     const adminRouter = new AdminRouter();
+    const jobRouter = new JobRouter();
+    const companyRouter = new CompanyRouter();
+    const applicationRouter = new ApplicationRouter();
 
     this.app.get('/api', (req: Request, res: Response) => {
       res.send(`Hello, Purwadhika Student API!`);
@@ -61,6 +67,9 @@ export default class App {
 
     this.app.use('/api/user', userRouter.getRouter());
     this.app.use('/api/admin', adminRouter.getRouter());
+    this.app.use('/api/jobs', jobRouter.getRouter());
+    this.app.use('/api/company', companyRouter.getRouter());
+    this.app.use('/api/application', applicationRouter.getRouter());
   }
 
   public start(): void {

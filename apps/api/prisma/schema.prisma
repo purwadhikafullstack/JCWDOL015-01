@@ -12,7 +12,7 @@ datasource db {
 
 model User {
   id                  Int               @id @default(autoincrement())
-  password            String
+  password            String?
   email               String            @unique
   name                String?
   birthDate           DateTime?
@@ -21,6 +21,7 @@ model User {
   address             String?
   profilePictureUrl   String?
   isVerified          Boolean           @default(false)
+  isBlocked           Boolean           @default(false)
   subscriptionType    SubscriptionType?
   subscriptionEndDate DateTime?
   subscriptions       Subscription[]
@@ -38,6 +39,7 @@ model Admin {
   phoneNumber        String
   companyDescription String?
   companyLogoUrl     String?
+  isBlocked          Boolean        @default(false)
   status             AdminStatus
   jobs               Job[]
   notifications      Notification[]
@@ -56,7 +58,7 @@ model Developer {
 }
 
 model Auth {
-  id            Int    @id @default(autoincrement())
+  id            Int       @id @default(autoincrement())
   userId        Int?      @unique
   adminId       Int?      @unique
   developerId   Int?      @unique
@@ -71,7 +73,7 @@ model Auth {
 }
 
 model Subscription {
-  id        Int           @id @default(autoincrement())
+  id        Int              @id @default(autoincrement())
   userId    Int
   type      SubscriptionType
   startDate DateTime
@@ -81,7 +83,7 @@ model Subscription {
 }
 
 model Job {
-  id           Int   @id @default(autoincrement())
+  id           Int      @id @default(autoincrement())
   adminId      Int
   title        String
   description  String
@@ -97,10 +99,10 @@ model Job {
 }
 
 model Application {
-  id             Int            @id @default(autoincrement())
+  id             Int               @id @default(autoincrement())
   jobId          Int
   userId         Int
-  status         ApplicationStatus
+  status         ApplicationStatus? @default(PENDING)
   resumeUrl      String
   appliedAt      DateTime          @default(now())
   coverLetter    String?
@@ -113,7 +115,7 @@ model Application {
 }
 
 model SkillAssessment {
-  id              Int          @id @default(autoincrement())
+  id              Int             @id @default(autoincrement())
   developerId     Int
   title           String
   description     String
@@ -125,8 +127,8 @@ model SkillAssessment {
 }
 
 model InterviewSchedule {
-  id            Int          @id @default(autoincrement())
-  applicationId Int          @unique
+  id            Int             @id @default(autoincrement())
+  applicationId Int             @unique
   dateTime      DateTime
   location      String
   status        InterviewStatus
@@ -135,7 +137,7 @@ model InterviewSchedule {
 }
 
 model Notification {
-  id          Int             @id @default(autoincrement())
+  id          Int                @id @default(autoincrement())
   userId      Int?
   adminId     Int?
   developerId Int?
@@ -150,7 +152,7 @@ model Notification {
 }
 
 model PaymentHistory {
-  id            Int        @id @default(autoincrement())
+  id            Int           @id @default(autoincrement())
   userId        Int
   amount        Float
   paymentMethod PaymentMethod

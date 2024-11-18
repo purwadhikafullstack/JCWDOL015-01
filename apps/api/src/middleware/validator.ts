@@ -50,3 +50,22 @@ export const validateRegisterAdmin = [
     next();
   },
 ];
+
+export const validateCheckEmail = [
+  body('email')
+    .isEmail()
+    .withMessage('Invalid email format')
+    .notEmpty()
+    .withMessage('Email cannot be empty'),
+
+  (req: Request, res: Response, next: NextFunction) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).send({
+        message: 'Validation error',
+        error: errors.array(),
+      });
+    }
+    next();
+  },
+];

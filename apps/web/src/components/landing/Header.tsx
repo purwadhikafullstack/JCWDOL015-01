@@ -14,7 +14,6 @@ export const Header = () => {
 
   return (
     <div className="flex flex-row p-2 h-20 w-full items-center justify-between gap-5 bg-blue-600 text-white font-bold">
-      {/* Logo */}
       <div className="ml-10">
         <Link href="/">
           <Image
@@ -26,10 +25,9 @@ export const Header = () => {
           />
         </Link>
       </div>
-      {/* Utilities */}
       <div className="flex flex-row justify-center gap-3 h-20 items-center">
         {isActive('/jobs') ? (
-          <span className="border-amber-400 border-y-8 h-20 flex items-center duration-100">
+          <span className="border-cyan-500 border-y-8 h-20 flex items-center duration-100">
             Look for Jobs
           </span>
         ) : (
@@ -42,7 +40,7 @@ export const Header = () => {
         )}
         <div>|</div>
         {isActive('/skill') ? (
-          <span className="border-amber-400 border-y-8 h-20 flex items-center duration-100">
+          <span className="border-cyan-500 border-y-8 h-20 flex items-center duration-100">
             Skill Tests
           </span>
         ) : (
@@ -54,25 +52,30 @@ export const Header = () => {
           </Link>
         )}
         <div>|</div>
-        {isActive('/companies') ? (
-          <span className="border-amber-400 border-y-8 h-20 flex items-center duration-100">
+        {isActive('/company') ? (
+          <span className="border-cyan-500 border-y-8 h-20 flex items-center duration-100">
             Our Affiliates
           </span>
         ) : (
           <Link
-            href="/companies"
+            href="/company"
             className="border-white hover:border-y-8 h-20 flex items-center duration-100"
           >
             Our Affiliates
           </Link>
         )}
       </div>
-      {/* Auth */}
       <div className="flex flex-row justify-center gap-2">
         {isAdmin ? (
-          <span className="border-amber-400 border-y-8 h-20 flex items-center duration-100">
-            For Admin
-          </span>
+          <div className="flex flex-row justify-center gap-2">
+            <span className="border-cyan-500 border-y-8 h-20 flex items-center duration-100">
+              For Admin
+            </span>
+            <div className="flex items-center">|</div>
+            <Link href="/admin/dashboard" className="flex items-center">
+              Dashboard
+            </Link>
+          </div>
         ) : (
           <div className="flex flex-row justify-center gap-2">
             <Link
@@ -103,9 +106,6 @@ export const Header = () => {
             )}
           </div>
         )}
-
-        <div className="flex items-center">|</div>
-        <div className="flex items-center">Toggle Language</div>
       </div>
     </div>
   );
