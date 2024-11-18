@@ -6,6 +6,7 @@ import { Footer } from '@/components/landing/Footer';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { AuthProvider } from '@/components/authContext/AuthContext';
+import StoreProvider from '@/components/storeProvider';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
@@ -21,17 +22,19 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <AuthProvider>
-          <Header />
-          {children}
+        <StoreProvider>
+          <AuthProvider>
+            <Header />
+            {children}
 
-          <Footer />
-          <ToastContainer
-            position="bottom-right"
-            autoClose={5000}
-            closeOnClick
-          />
-        </AuthProvider>
+            <Footer />
+            <ToastContainer
+              position="bottom-right"
+              autoClose={5000}
+              closeOnClick
+            />
+          </AuthProvider>
+        </StoreProvider>
       </body>
     </html>
   );

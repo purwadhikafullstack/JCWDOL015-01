@@ -3,6 +3,7 @@
 import { useAuth } from '@/components/authContext/AuthContext';
 import { ErrorMessage, Field, Form, Formik } from 'formik';
 import * as yup from 'yup';
+import { GoogleSignInButton } from './AuthButton';
 
 const LoginSchema = yup.object().shape({
   email: yup.string().email().required('Email is required'),
@@ -67,6 +68,8 @@ export default function LoginForm() {
               >
                 Login
               </button>
+              <p>or</p>
+              <GoogleSignInButton />
             </div>
           </Form>
         );

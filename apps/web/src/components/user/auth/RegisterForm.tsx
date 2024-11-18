@@ -5,6 +5,7 @@ import { ErrorMessage, Field, Form, Formik, FormikHelpers } from 'formik';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import * as yup from 'yup';
+import { GoogleSignInButton } from './AuthButton';
 
 const RegisterSchema = yup.object().shape({
   email: yup.string().email('Invalid email').required('Email Required'),
@@ -91,6 +92,11 @@ export default function RegisterForm() {
               >
                 Register
               </button>
+
+              <br />
+              <p className='items-center'>or</p>
+              <GoogleSignInButton />
+              
             </div>
           </Form>
         );

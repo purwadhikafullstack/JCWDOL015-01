@@ -11,8 +11,8 @@ export const verifyToken = async (
     const token = req.header('Authorization')?.replace('Bearer ', '');
     if (!token) throw new Error('Token not found');
 
-    const verifiedToken = verify(token, process.env.JWT!);
-    req.user = verifiedToken as IUser;
+    const verifiedToken = verify(token, process.env.JWT!) as IUser;
+    req.user = verifiedToken;
     next();
   } catch (error) {
     res.status(401).send({
