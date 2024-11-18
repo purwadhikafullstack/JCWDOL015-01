@@ -370,7 +370,7 @@ const EditJobPosting = () => {
         formData.append('is_published', String(jobData.isPublished));
     
         try {
-            const response = await fetch(`/api/job-postings/${id}`, {
+            const response = await fetch(`http://localhost:8000/api/jobs/${id}`, {
                 method: 'PUT',
                 body: formData,
             });

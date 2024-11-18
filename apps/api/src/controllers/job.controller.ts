@@ -129,12 +129,14 @@ export class JobController {
             expiry_date,
             requires_test,
             remote_option,
-            is_published,
+            published,
         } = req.body;
 
-        const banner = req.file ? `/uploads/${req.file.filename}` : undefined;
+        // const banner = req.file ? `/uploads/${req.file.filename}` : undefined;
 
         try {
+            const banner = req.file ? `/uploads/${req.file.filename}` : undefined;
+
             const updatedJob = await updateJobService(jobId, {
                 title,
                 description,
@@ -142,10 +144,10 @@ export class JobController {
                 location,
                 salary: parseFloat(salary),
                 tags,
-                expiry_date,
-                requires_test,
-                remote_option,
-                is_published,
+                expiry_date: new Date(expiry_date),
+                requires_test: req.body.requires_test === 'true',
+                remote_option: req.body.remote_option === 'true',
+                published: req.body.is_published === 'true',
                 banner,
             });
 

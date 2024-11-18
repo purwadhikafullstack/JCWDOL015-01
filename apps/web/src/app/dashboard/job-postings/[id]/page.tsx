@@ -78,6 +78,32 @@ const JobPostingDetail = ({ params }: { params: { id: string } }) => {
               <strong>Requires Test:</strong> {job.requires_test ? "Yes" : "No"}
               {job.requires_test && <Link className="ml-2 text-blue-500 underline " href={`/dashboard/job-postings/${job.id}/manage-test`}>Manage Test</Link>}
             </p>
+
+            <Link href={`/dashboard/job-postings/${job.id}/edit`} className="mt-4 inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+              Edit Job Posting
+            </Link>
+          <button
+            onClick={async () => {
+              if (confirm('Apakah Anda yakin ingin menghapus postingan pekerjaan ini?')) {
+                try {
+                  const response = await fetch(`http://localhost:8000/api/jobs/${id}`, {
+                    method: 'DELETE',
+                  });
+                  if (response.ok) {
+                    alert('Postingan pekerjaan berhasil dihapus!');
+                    window.location.href = '/dashboard/job-postings';
+                  } else {
+                    throw new Error('Gagal menghapus postingan pekerjaan');
+                  }
+                } catch (error) {
+                  console.error('Failed to delete job posting:', error);
+                }
+              }
+            }}
+            className="mt-4 inline-block bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+          >
+            Hapus Job Posting
+          </button>
           </div>
 
           {/* Applicants Section */}

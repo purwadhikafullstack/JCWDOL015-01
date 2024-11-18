@@ -12,7 +12,7 @@ import { PrismaClient } from '@prisma/client';
         expiry_date?: Date;
         requires_test?: boolean; // Ensure this property is included
         remote_option?: boolean;
-        is_published?: boolean;
+        published?: boolean;
         banner?: string;
     }
 
@@ -39,6 +39,7 @@ import { PrismaClient } from '@prisma/client';
 
     export const updateJobPosting = async (id: number, data: UpdateJobInput) => {
         try {
+            // cast requires_test to boolean
             return await prisma.job.update({
                 where: { id },
                 data,
