@@ -118,14 +118,26 @@ export const columns: ColumnDef<Job>[] = [
   {
     accessorKey: 'published',
     header: 'Published',
+    cell: ({ row }) => {
+      const job = row.original;
+      return job.published ? 'Yes' : 'No';
+    }
   },
   {
     accessorKey: 'requires_test',
     header: 'Requires Test',
+    cell: ({ row }) => {
+      const job = row.original;
+      return job.requires_test ? 'Yes' : 'No';
+    }
   },
   {
     accessorKey: 'remote_option',
     header: 'Remote Option',
+    cell: ({ row }) => {
+      const job = row.original;
+      return job.remote_option ? 'Yes' : 'No';
+    }
   },
   {
     accessorKey: 'applicantCount',

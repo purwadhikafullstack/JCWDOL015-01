@@ -78,6 +78,12 @@ const JobPostingDetail = ({ params }: { params: { id: string } }) => {
               <strong>Requires Test:</strong> {job.requires_test ? "Yes" : "No"}
               {job.requires_test && <Link className="ml-2 text-blue-500 underline " href={`/dashboard/job-postings/${job.id}/manage-test`}>Manage Test</Link>}
             </p>
+            <p>
+              <strong>Remote Option:</strong> {job.remote_option ? "Yes" : "No"}
+            </p>
+            <p>
+              <strong>Published:</strong> {job.published ? "Yes" : "No"}
+            </p>
 
             <Link href={`/dashboard/job-postings/${job.id}/edit`} className="mt-4 inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
               Edit Job Posting
