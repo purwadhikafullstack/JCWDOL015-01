@@ -113,27 +113,75 @@ export async function getJobInterest() {
   }
 }
 
-// // Add a new interest to a user’s analytics record
-// export async function addUserInterest(userId: number, newInterest: string) {
-//   try {
-//     const userAnalytics = await prisma.analytics.findUnique({
-//       where: { user_id: userId },
-//     });
+export async function getTotalApplicant() {
+  try {
+    const totalApplicant = await prisma.applicant.count();
+    return totalApplicant;
+  } catch (error) {
+    console.error("Error fetching total applicant:", error);
+    throw new Error("Error fetching total applicant");
+  }
+}
 
-//     if (userAnalytics) {
-//       const updatedInterests = [...new Set([...userAnalytics.interests, newInterest])];
-//       await prisma.analytics.update({
-//         where: { user_id: userId },
-//         data: { interests: updatedInterests },
-//       });
-//     } else {
-//       // Create a new analytics entry if none exists for the user
-//       await prisma.analytics.create({
-//         data: { user_id: userId, interests: [newInterest], age: userAnalytics?.age || null }, // Include age if required
-//       });
-//     }
-//   } catch (error) {
-//     console.error("Error adding user interest:", error);
-//     throw new Error("Error adding user interest");
-//   }
-// }
+export async function getTotalAcceptedApplicant() {
+  try {
+    const totalAcceptedApplicant = await prisma.applicant.count({
+      where: {
+        status: "accepted"
+      }
+    });
+    return totalAcceptedApplicant;
+  } catch (error) {
+    console.error("Error fetching total accepted applicant:", error);
+    throw new Error("Error fetching total accepted applicant");
+  }
+}
+
+export async function getTotalRejectedApplicant() {
+  try {
+    const totalRejectedApplicant = await prisma.applicant.count({
+      where: {
+        status: "rejected"
+      }
+    });
+    return totalRejectedApplicant;
+  } catch (error) {
+    console.error("Error fetching total rejected applicant:", error);
+    throw new Error("Error fetching total rejected applicant");
+  }
+}
+
+export async function getTotalJob() {
+  try {
+    const totalJob = await prisma.job.count();
+    return totalJob;
+  } catch (error) {
+    console.error("Error fetching total job:", error);
+    throw new Error("Error fetching total job");
+  }
+}
+
+export async function getIncomingInterviewSchedule() {
+  try {
+    const incomingInterviewSchedule = await prisma.interviewSchedule.findMany({
+      where: {
+        date_time: {
+          gte: new Date()
+        }
+      },
+      take: 10,
+      include: {
+        applicant: {
+          include: {
+            user: true,
+            job: true
+          }
+        }
+      }
+    });
+    return incomingInterviewSchedule;
+  } catch (error) {
+    console.error("Error fetching incoming interview schedule:", error);
+    throw new Error("Error fetching incoming interview schedule");
+  }
+}

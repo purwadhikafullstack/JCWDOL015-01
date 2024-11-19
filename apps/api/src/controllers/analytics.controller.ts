@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getJobInterest, getSalaryTrends, getUserAgeDistribution, getUserGenderDistribution, getUserLocationDistribution } from "../services/analytics.service";
+import { getIncomingInterviewSchedule, getJobInterest, getSalaryTrends, getTotalAcceptedApplicant, getTotalApplicant, getTotalJob, getTotalRejectedApplicant, getUserAgeDistribution, getUserGenderDistribution, getUserLocationDistribution } from "../services/analytics.service";
 
 export async function getUserAgeController(req: Request, res: Response) {
   try {
@@ -62,19 +62,52 @@ export async function getJobInterestController(req: Request, res: Response) {
   }
 }
 
-// export async function addUserInterestController(req: Request, res: Response) {
-//   const userId = req.params.userId;
-//   const { interest } = req.body;
+export async function getTotalApplicantController(req: Request, res: Response) {
+  try {
+    const totalApplicants = await getTotalApplicant();
+    res.status(200).json({ totalApplicants });
+  } catch (error) {
+    console.error("Error fetching total applicants:", error);
+    res.status(500).json({ message: "Error fetching total applicants" });
+  }
+}
 
-//   if (!interest) {
-//     return res.status(400).json({ message: "Interest is required" });
-//   }
+export async function getTotalAcceptedController(req: Request, res: Response) {
+  try {
+    const totalApplicants = await getTotalAcceptedApplicant();
+    res.status(200).json({ totalApplicants });
+  } catch (error) {
+    console.error("Error fetching total applicants:", error);
+    res.status(500).json({ message: "Error fetching total applicants" });
+  }
+}
 
-//   try {
-//     await addUserInterest(Number(userId), interest);
-//     res.status(200).json({ message: "User interest added successfully" });
-//   } catch (error) {
-//     console.error("Error adding user interest:", error);
-//     res.status(500).json({ message: "Error adding user interest" });
-//   }
-// }
+export async function getTotalRejectedController(req: Request, res: Response) {
+  try {
+    const totalApplicants = await getTotalRejectedApplicant();
+    res.status(200).json({ totalApplicants });
+  } catch (error) {
+    console.error("Error fetching total applicants:", error);
+    res.status(500).json({ message: "Error fetching total applicants" });
+  }
+}
+
+export async function getTotalJobController(req: Request, res: Response) {
+  try {
+    const totalJobs = await getTotalJob();
+    res.status(200).json({ totalJobs });
+  } catch (error) {
+    console.error("Error fetching total applicants:", error);
+    res.status(500).json({ message: "Error fetching total applicants" });
+  }
+}
+
+export async function getIncomingInterviewController(req: Request, res: Response) {
+  try {
+    const interviews = await getIncomingInterviewSchedule();
+    res.status(200).json({ interviews });
+  } catch (error) {
+    console.error("Error fetching incomming interviews:", error);
+    res.status(500).json({ message: "Error fetching incomming interviews" });
+  }
+}
