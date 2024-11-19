@@ -146,20 +146,20 @@ export const deleteSchedule = async (id: number): Promise<void> => {
 };
 
 // Email Notification function
-export const sendEmailNotification = async (applicationId: number) => {
-  // Fetch the application and associated user details
-  const application = await prisma.application.findUnique({
-    where: { id: applicationId },
+export const sendEmailNotification = async (applicantId: number) => {
+  // Fetch the applicant and associated user details
+  const applicant = await prisma.applicant.findUnique({
+    where: { id: applicantId },
     include: { user: true }, // Include user details
   });
 
-  // Fetch the latest interview schedule for this application
+  // Fetch the latest interview schedule for this applicant
   const interviewSchedule = await prisma.interviewSchedule.findFirst({
-    where: { applicant_id: applicationId },
+    where: { applicant_id: applicantId },
     orderBy: { date_time: 'asc' }, // Get the earliest scheduled interview
   });
   
-  if (application && application.user && interviewSchedule) {
+  if (applicant && applicant.user && interviewSchedule) {
     const { date_time, location } = interviewSchedule; // Access interview details
   
     // Set up Nodemailer transporter
@@ -175,16 +175,16 @@ export const sendEmailNotification = async (applicationId: number) => {
     });
   
     const subject = 'Interview Schedule Confirmation';
-    const text = `Dear ${application.user.name},\n\nYou have an interview scheduled on ${date_time.toISOString()} at ${location}.\n\nBest regards,\nYour Team`;
+    const text = `Dear ${applicant.user.name},\n\nYou have an interview scheduled on ${date_time.toISOString()} at ${location}.\n\nBest regards,\nYour Team`;
   
     // Send the email notification
     await emailService.sendMail({
-      to: application.user.email,
+      to: applicant.user.email,
       subject,
       text,
     });
   } else {
-    // Handle cases where application or interview schedule is not found
-    console.error('Application or interview schedule not found for ID:', applicationId);
+    // Handle cases where applicant or interview schedule is not found
+    console.error('Applicant or interview schedule not found for ID:', applicantId);
   }
 };
