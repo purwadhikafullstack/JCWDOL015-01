@@ -8,68 +8,83 @@ datasource db {
 }
 
 model User {
-  id                    Int       @id @default(autoincrement())
-  username              String
-  password              String
-  email                 String
-  name                  String
-  birth_date            DateTime
-  gender                String
-  education             String
-  address               String
-  profile_picture_url   String
-  is_verified           Boolean
-  subscription_type     SubscriptionType
-  subscription_end_date DateTime?
-
-  analytics Analytics[]
-  applicant Applicant[]
-  application Application[]
+  id                  Int               @id @default(autoincrement())
+  password            String?
+  email               String            @unique
+  name                String?
+  birthDate           DateTime?
+  gender              String?
+  education           String?
+  address             String?
+  profilePictureUrl   String?
+  isVerified          Boolean           @default(false)
+  isBlocked           Boolean           @default(false)
+  subscriptionType    SubscriptionType?
+  subscriptionEndDate DateTime?
+  subscriptions       Subscription[]
+  applications        Application[]
+  applicant           Applicant[]
+  notifications       Notifications[]
+  paymentHistories    PaymentHistory[]
+  analytics           Analytics[]
+  auth                Auth?
 }
 
 model Admin {
-  id                    Int       @id @default(autoincrement())
-  username              String
-  password              String
-  email                 String
-  company_name          String
-  phone_number          String
-  company_description   String
-  company_logo_url      String
-  status                AdminStatus
-
-  test Test[]
+  id                 Int            @id @default(autoincrement())
+  password           String
+  email              String         @unique
+  companyName        String
+  phoneNumber        String
+  companyDescription String?
+  companyLogoUrl     String?
+  isBlocked          Boolean        @default(false)
+  status             AdminStatus
+  jobs               Job[]
+  notifications      Notifications[]
+  test               Test[]
+  auth               Auth?
 }
 
 model Developer {
-  id                    Int       @id @default(autoincrement())
-  username              String
-  password              String
-  email                 String
+  id               Int               @id @default(autoincrement())
+  password         String
+  email            String            @unique
+  role             DeveloperRole
+  lastLogin        DateTime?
+  skillAssessments SkillAssessment[]
+  notifications    Notifications[]
+  auth             Auth?
 }
 
 model Auth {
-  id               Int       @id @default(autoincrement())
-  user_id          Int?  
-  admin_id         Int?  
-  developer_id     Int?  
-  username         String
-  password         String
-  last_login       DateTime
-  login_attempts    Int
+  id            Int       @id @default(autoincrement())
+  userId        Int?      @unique
+  adminId       Int?      @unique
+  developerId   Int?      @unique
+  email         String    @unique
+  password      String
+  lastLogin     DateTime?
+  loginAttempts Int       @default(0)
+
+  user      User?      @relation(fields: [userId], references: [id])
+  admin     Admin?     @relation(fields: [adminId], references: [id])
+  developer Developer? @relation(fields: [developerId], references: [id])
 }
 
 model Subscription {
-  id          Int       @id @default(autoincrement())
-  user_id     Int 
-  type        SubscriptionType
-  start_date  DateTime
-  end_date    DateTime
+  id        Int              @id @default(autoincrement())
+  userId    Int
+  type      SubscriptionType
+  startDate DateTime
+  endDate   DateTime
+
+  user User @relation(fields: [userId], references: [id])
 }
 
 model Job {
   id              Int       @id @default(autoincrement())
-  admin_id        Int   
+  adminId        Int   
   title           String
   description     String
   banner          String? 
@@ -87,54 +102,33 @@ model Job {
   applicant       Applicant[]
   test            Test[]
   application     Application[]
+  admin        Admin         @relation(fields: [adminId], references: [id])
 }
 
-// model JobPosting {
-//   id              Int       @id @default(autoincrement())
-//   admin_id        Int
-//   title           String
-//   description     String
-//   banner          String?   
-//   category        String    
-//   location        String    // Main job location; use either city or location based on preference
-//   salary          Decimal? @db.Decimal(10, 2)    
-//   tags            String[]  
-//   expiry_date     DateTime  
-//   published       Boolean   @default(false)
-//   requires_test   Boolean   @default(true)
-//   remote_option   Boolean   @default(false)
-//   created_at      DateTime  @default(now())
-//   updated_at      DateTime  @updatedAt
-
-//   applicant       Applicant[]
-//   test            Test[]
-//   application     Application[]
-// }
-
-
 model Application {
-  id                Int       @id @default(autoincrement())
-  job_id            Int  
-  user_id          Int
-  status            ApplicationStatus
-  resume            Bytes
-  applied_at        DateTime @default(now())
-  cover_letter      String
-  expected_salary   Decimal @db.Decimal(10, 2)
+  id             Int               @id @default(autoincrement())
+  jobId          Int
+  userId         Int
+  status         ApplicationStatus? @default(PENDING)
+  resumeUrl      String
+  appliedAt      DateTime          @default(now())
+  coverLetter    String?
+  expectedSalary Float?
 
-  job              Job      @relation(fields: [job_id], references: [id])
-  user             User     @relation(fields: [user_id], references: [id]) 
+  job  Job  @relation(fields: [jobId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 }
 
 model SkillAssessment {
-  id                Int       @id @default(autoincrement())
-  developer_id      Int?  
-  admin_id          Int?  
-  title             String
-  description       String
-  question_count    Int
-  difficulty_level   DifficultyLevel
-  is_active         Boolean
+  id              Int             @id @default(autoincrement())
+  developerId     Int
+  title           String
+  description     String
+  questionCount   Int
+  difficultyLevel DifficultyLevel
+  isActive        Boolean         @default(true)
+
+  developer Developer @relation(fields: [developerId], references: [id])
 }
 
 model InterviewSchedule {
@@ -148,24 +142,30 @@ model InterviewSchedule {
 }
 
 model Notifications {
-  id               Int       @id @default(autoincrement())
-  user_id          Int? 
-  admin_id         Int?
-  developer_id     Int? 
-  message          String
-  type             NotificationType
-  created_at       DateTime @default(now())
-  status           NotificationStatus
+  id          Int                @id @default(autoincrement())
+  userId      Int?
+  adminId     Int?
+  developerId Int?
+  message     String
+  type        NotificationType
+  createdAt   DateTime           @default(now())
+  status      NotificationStatus
+
+  user      User?      @relation(fields: [userId], references: [id])
+  admin     Admin?     @relation(fields: [adminId], references: [id])
+  developer Developer? @relation(fields: [developerId], references: [id])
 }
 
 model PaymentHistory {
-  id               Int       @id @default(autoincrement())
-  user_id          Int
-  amount           Decimal @db.Decimal(10, 2)
-  payment_method   PaymentMethod
-  payment_date     DateTime @default(now())
-  transaction_id   Int
-  status           PaymentStatus
+  id            Int           @id @default(autoincrement())
+  userId        Int
+  amount        Float
+  paymentMethod PaymentMethod
+  paymentDate   DateTime      @default(now())
+  transactionId String
+  status        PaymentStatus
+
+  user User @relation(fields: [userId], references: [id])
 }
 
 model Test {
@@ -221,24 +221,13 @@ model Applicant {
   applied_at        DateTime @default(now())
   cv_url            String? 
   expected_salary   Decimal? @db.Decimal(10, 2)
-  status            ApplicationStatus @default(pending)
+  status            ApplicationStatus @default(PENDING)
   interview_schedule InterviewSchedule[]
   job              Job      @relation(fields: [job_posting_id], references: [id])
   user             User     @relation(fields: [user_id], references: [id])
 
   result Result[]
 }
-
-// model Analytics {
-//   id               Int       @id @default(autoincrement())
-//   user_id          Int 
-//   age               Int
-//   gender            String?
-//   location          String?
-//   salary_reported   Decimal? 
-//   interests         String?
-//   user              User      @relation(fields: [user_id], references: [id]) 
-// }
 
 model Analytics {
   id              Int       @id @default(autoincrement())
@@ -254,54 +243,59 @@ model Analytics {
 }
 
 enum SubscriptionType {
-  standard
-  professional
+  STANDARD
+  PROFESSIONAL
 }
 
 enum AdminStatus {
-  active
-  inactive
+  ACTIVE
+  INACTIVE
+}
+
+enum DeveloperRole {
+  ADMIN
+  SUPPORT
 }
 
 enum DifficultyLevel {
-  easy
-  medium
-  hard
+  EASY
+  MEDIUM
+  HARD
 }
 
 enum ApplicationStatus {
-  pending
-  accepted
-  rejected
-  under_review
-  in_process
-  interview
+  PENDING
+  ACCEPTED
+  REJECTED
+  UNDER_REVIEW
+  IN_PROCESS
+  INTERVIEW
 }
 
 enum InterviewStatus {
-  scheduled
-  completed
-  canceled
+  SCHEDULED
+  COMPLETED
+  CANCELED
 }
 
 enum NotificationType {
-  email
-  alert
-  reminder
+  EMAIL
+  ALERT
+  REMINDER
 }
 
 enum NotificationStatus {
-  sent
-  pending
+  SENT
+  PENDING
 }
 
 enum PaymentMethod {
-  manual
-  gateway
+  MANUAL
+  GATEWAY
 }
 
 enum PaymentStatus {
-  approved
-  pending
-  failed
+  APPROVED
+  PENDING
+  FAILED
 }

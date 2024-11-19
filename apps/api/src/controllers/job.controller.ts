@@ -1,334 +1,160 @@
-// import { Request, Response } from 'express';
-// import { Decimal } from '@prisma/client/runtime/library'; // Ensure you import Decimal correctly
-// import {
-//     updateJobPosting as updateJobService,
-//     createJobPosting as createJobService,
-//     deleteJobPosting as deleteJobService,
-//     toggleJobPublishStatus as togglePublishService,
-//     getJobPostings as getPostingsService,
-//     getJobPostingDetail as getPostingDetailService
-// } from '@/services/job.service'; // Import necessary service methods
-
-// export class JobController {
-//     async updateJobPosting(req: Request, res: Response) {
-//         const jobId = parseInt(req.params.id, 10);
-//         const { title, description, category, location, salary, tags, expiry_date, requires_test, remote_option, is_published } = req.body;
-//         const banner = req.file ? `/uploads/${req.file.filename}` : undefined; // Handle uploaded file
-
-//         try {
-//             const updatedJob = await updateJobService(jobId, {
-//                 title,
-//                 description,
-//                 category,
-//                 location,
-//                 salary: parseFloat(salary), // Convert salary to number if necessary
-//                 tags,
-//                 expiry_date,
-//                 requires_test,
-//                 remote_option,
-//                 is_published,
-//                 banner,
-//             });
-
-//             if (!updatedJob) {
-//                 return res.status(404).json({ message: "Job posting not found." });
-//             }
-
-//             res.status(200).json({ message: "Job posting updated successfully.", updatedJob });
-//         } catch (error) {
-//             console.error("Update error:", error);
-//             const errorMessage = (error as Error).message; // Type assertion
-//             res.status(500).json({ message: "Failed to update job posting.", error: errorMessage });
-//         }
-//     }
-
-//     async createJobPosting(req: Request, res: Response) {
-//         try {
-//             const jobData = req.body;
-//             const banner = req.file ? `/uploads/${req.file.filename}` : undefined; // Save path if file uploaded
-//             const job = await createJobService({ ...jobData, banner });
-//             return res.status(201).json(job);
-//         } catch (error: unknown) {
-//             return res.status(500).json({ message: 'Failed to create job posting.', error: error instanceof Error ? error.message : 'Unknown error' });
-//         }
-//     }
-
-//     async deleteJobPosting(req: Request, res: Response) {
-//         const { id } = req.params;
-
-//         try {
-//             await deleteJobService(Number(id)); // Pass the id
-//             return res.status(204).send(); // No content to return
-//         } catch (error: unknown) {
-//             return res.status(500).json({ message: 'Failed to delete job posting.', error: error instanceof Error ? error.message : 'Unknown error' });
-//         }
-//     }
-
-//     async toggleJobPublishStatus(req: Request, res: Response) {
-//         const { id } = req.params;
-//         const { published } = req.body;
-
-//         try {
-//             const updatedJob = await togglePublishService(Number(id), published);
-//             return res.status(200).json(updatedJob);
-//         } catch (error: unknown) {
-//             return res.status(500).json({ message: 'Failed to toggle publish status.', error: error instanceof Error ? error.message : 'Unknown error' });
-//         }
-//     }
-
-//     async getJobPostings(req: Request, res: Response) {
-//         try {
-//             const jobs = await getPostingsService(req.query as any); // Adjust as necessary for your query parameters
-//             const jobsWithApplicantCount = jobs.map((job) => ({
-//                 ...job,
-//                 applicantCount: job.applicant.length,
-//             }));
-//             return res.status(200).json(jobsWithApplicantCount);
-//         } catch (error: unknown) {
-//             return res.status(500).json({ message: 'Failed to fetch job postings.', error: error instanceof Error ? error.message : 'Unknown error' });
-//         }
-//     }
-
-//     async getJobPostingDetail(req: Request, res: Response) {
-//         const { id } = req.params; // `id` is retrieved from the request params
-
-//         try {
-//             const job = await getPostingDetailService(Number(id)); // Pass `id` to service function
-//             if (!job) return res.status(404).json({ message: 'Job posting not found.' });
-//             return res.status(200).json(job);
-//         } catch (error: unknown) {
-//             return res.status(500).json({ message: 'Failed to fetch job details.', error: error instanceof Error ? error.message : 'Unknown error' });
-//         }
-//     }
-// }
-
+import { PrismaClient } from '@prisma/client';
 import { Request, Response } from 'express';
-import {
-    updateJobPosting as updateJobService,
-    createJobPosting as createJobService,
-    deleteJobPosting as deleteJobService,
-    toggleJobPublishStatus as togglePublishService,
-    getJobPostings as getPostingsService,
-    getTotalJobs as getTotalJobsService,
-    getJobPostingDetail as getPostingDetailService,
-} from '@/services/job.service';
 
-import { getTestsByJobId } from '@/services/test.service';
-import { checkApplicant, createApplicant } from '@/services/applicant.service';
+const prisma = new PrismaClient();
 
 export class JobController {
-    async updateJobPosting(req: Request, res: Response) {
-        const jobId = parseInt(req.params.id, 10);
-        const {
-            title,
-            description,
-            category,
-            location,
-            salary,
-            tags,
-            expiry_date,
-            requires_test,
-            remote_option,
-            published,
-        } = req.body;
 
-        // const banner = req.file ? `/uploads/${req.file.filename}` : undefined;
-
-        try {
-            const banner = req.file ? `/uploads/${req.file.filename}` : undefined;
-
-            const updatedJob = await updateJobService(jobId, {
-                title,
-                description,
-                category,
-                location,
-                salary: parseFloat(salary),
-                tags,
-                expiry_date: new Date(expiry_date),
-                requires_test: req.body.requires_test === 'true',
-                remote_option: req.body.remote_option === 'true',
-                published: req.body.is_published === 'true',
-                banner,
-            });
-
-            if (!updatedJob) {
-                return res.status(404).json({ message: 'Job posting not found.' });
-            }
-
-            res
-                .status(200)
-                .json({ message: 'Postingan pekerjaan berhasil diperbarui.', updatedJob });
-        } catch (error) {
-            console.error('Update error:', error);
-            res
-                .status(500)
-                .json({
-                    message: 'Gagal memperbarui postingan pekerjaan.',
-                    error: error instanceof Error ? error.message : 'Unknown error',
-                });
-        }
+  async getJobsByGeolocation(req: Request, res: Response) {
+    const { lat, lng, radius = 10000, limit = 10 } = req.query;
+  
+    // Make sure lat and lng are provided and are valid numbers
+    if (!lat || !lng || isNaN(Number(lat)) || isNaN(Number(lng))) {
+      return res.status(400).json({ error: 'Valid latitude and longitude are required' });
     }
-
-    async createJobPosting(req: Request, res: Response) {
-        try {
-            const jobData = {
-                ...req.body,
-                admin_id: parseInt(req.body.admin_id, 10),
-                salary: parseFloat(req.body.salary),
-                expiry_date: new Date(req.body.expiry_date),
-                created_at: new Date(),
-                requires_test: req.body.requires_test === 'true',
-                remote_option: req.body.remote_option === 'true',
-                published: req.body.is_published === 'true',
-            };
-            delete jobData.is_published;
-            const banner = req.file ? `/uploads/${req.file.filename}` : undefined;
-            const job = await createJobService({ ...jobData, banner });
-            return res.status(201).json(job);
-        } catch (error) {
-            return res
-                .status(500)
-                .json({
-                    message: 'Gagal membuat postingan pekerjaan.',
-                    error: error instanceof Error ? error.message : 'Unknown error',
-                });
-        }
+  
+    // Convert query parameters to numbers
+    const latitude = parseFloat(lat as string);
+    const longitude = parseFloat(lng as string);
+    const radiusValue = parseInt(radius as string, 10);
+    const limitValue = parseInt(limit as string, 10);
+  
+    try {
+      // Use raw query to fetch jobs based on geolocation
+      const jobs = await prisma.$queryRaw`
+        SELECT *, 
+               ST_Distance_Sphere(location, ST_GeomFromText('POINT(${longitude} ${latitude})')) AS distance
+        FROM Job
+        WHERE ST_Distance_Sphere(location, ST_GeomFromText('POINT(${longitude} ${latitude})')) <= ${radiusValue}
+        ORDER BY distance ASC
+        LIMIT ${limitValue};
+      `;
+  
+      res.status(200).json(jobs);
+    } catch (error) {
+      console.error('Error fetching jobs by geolocation:', error);
+      res.status(500).json({ error: 'Failed to fetch jobs by geolocation' });
     }
-
-    async deleteJobPosting(req: Request, res: Response) {
-        const { id } = req.params;
-
-        try {
-            await deleteJobService(Number(id));
-            return res.status(204).send();
-        } catch (error) {
-            return res
-                .status(500)
-                .json({
-                    message: 'Gagal menghapus postingan pekerjaan.',
-                    error: error instanceof Error ? error.message : 'Unknown error',
-                });
-        }
+  }
+  
+  
+  async getAllJobs(req: Request, res: Response) {
+    try {
+      const jobs = await prisma.job.findMany({
+        include: {
+          admin: true,
+          applications: true,
+        },
+      });
+      res.status(200).json(jobs);
+    } catch (error) {
+      console.error('Error fetching jobs:', error);
+      res.status(500).json({ error: 'Failed to fetch jobs' });
     }
+  }
 
-    async toggleJobPublishStatus(req: Request, res: Response) {
-        const { id } = req.params;
-        const { published } = req.body;
+  // Fetch job locations (countries)
+  async getJobLocations(req: Request, res: Response) {
+    try {
+      const locations = await prisma.job.findMany({
+        distinct: ['location'],  // Ensure unique locations
+        select: { location: true },  // Only return location field
+      });
 
-        try {
-            const updatedJob = await togglePublishService(Number(id), published);
-            return res.status(200).json(updatedJob);
-        } catch (error) {
-            return res
-                .status(500)
-                .json({
-                    message: 'Failed to toggle publish status.',
-                    error: error instanceof Error ? error.message : 'Unknown error',
-                });
-        }
+      if (!locations || locations.length === 0) {
+        throw new Error('No locations found');
+      }
+
+      res.status(200).json(locations.map(location => location.location)); // Return array of locations
+    } catch (error) {
+      console.error('Error fetching locations:', error);
+      res.status(500).json({ error: 'Failed to fetch locations' });
     }
+  }
 
-    async getJobPostings(req: Request, res: Response) {
-        try {
-            const { page = 1, limit = 10 } = req.query;
-            // Konversi ke angka
-            const pageNum = parseInt(page as string);
-            const limitNum = parseInt(limit as string);
-            const offset = (pageNum - 1) * limitNum;
-            const jobs = await getPostingsService({...req.query, offset, limit:limitNum});
-            const jobsWithApplicantCount = jobs.map((job: { applicant: any[] }) => ({
-                ...job,
-                applicantCount: job.applicant.length,
-            }));
-            const totalItems = await getTotalJobsService(req.query);
-            return res.status(200).json({
-                data:jobsWithApplicantCount,
-                pagination: {
-                    totalItems,
-                    totalPages: Math.ceil(totalItems / limitNum),
-                    currentPage: pageNum,
-                    pageSize: limitNum,
-                },
-            });
-        } catch (error) {
-            return res
-                .status(500)
-                .json({
-                    message: 'Gagal mengambil postingan pekerjaan.',
-                    error: error instanceof Error ? error.message : 'Unknown error',
-                });
-        }
+  // Fetch jobs by filters (tags, remote, location)
+  async getJobsByFilter(req: Request, res: Response) {
+    const { field, country, remoteOption, tags } = req.query;
+
+    try {
+      const filters: any = {};
+
+      if (field) filters.title = { contains: field };
+      if (country) filters.location = { contains: country };
+      if (remoteOption !== undefined) filters.remoteOption = remoteOption === 'true';
+
+      //if (tags) {
+      //  const tagsArray = tags.split(',').map(tag => tag.trim());  // Split and clean the tags string
+      //  filters.tags = { in: tagsArray };  // Use `in` to match any of the tags
+      //}
+
+      const jobs = await prisma.job.findMany({
+        where: filters,
+        include: {
+          admin: true,
+          applications: true,
+        },
+      });
+      res.status(200).json(jobs);
+    } catch (error) {
+      console.error('Error fetching jobs with filters:', error);
+      res.status(500).json({ error: 'Failed to fetch jobs with filters' });
     }
+  }
 
-    async getJobPostingDetail(req: Request, res: Response) {
-        const { id } = req.params;
+  // Add a new job
+  async addJob(req: Request, res: Response) {
+    const jobData = req.body;
 
-        try {
-            const job = await getPostingDetailService(Number(id));
-            if (!job)
-                return res.status(404).json({ message: 'Job posting not found.' });
-            return res.status(200).json(job);
-        } catch (error) {
-            return res
-                .status(500)
-                .json({
-                    message: 'Gagal mengambil detail pekerjaan.',
-                    error: error instanceof Error ? error.message : 'Unknown error',
-                });
-        }
+    try {
+      const newJob = await prisma.job.create({
+        data: {
+          title: jobData.title,
+          description: jobData.description,
+          location: jobData.location,
+          salary: jobData.salary,
+          expiryDate: jobData.expiryDate,
+          tags: jobData.tags,
+          remoteOption: jobData.remoteOption,
+          adminId: jobData.adminId,
+        },
+      });
+      res.status(201).json(newJob);
+    } catch (error) {
+      console.error('Error adding job:', error);
+      res.status(500).json({ error: 'Failed to add job' });
     }
+  }
 
-    async getJobPostingTest(req: Request, res: Response) {
-        const { id } = req.params;
+  // Update a job
+  async updateJob(req: Request, res: Response) {
+    const { id } = req.params;
+    const updatedData = req.body;
 
-        try {
-            const job = await getPostingDetailService(Number(id));
-            if (!job)
-                return res.status(404).json({ message: 'Postingan pekerjaan tidak ditemukan.' });
-
-            const test = await getTestsByJobId(Number(job.id));
-            return res.status(200).json(test);
-        } catch (error) {
-            return res
-                .status(500)
-                .json({
-                    message: 'Gagal mengambil detail pekerjaan.',
-                    error: error instanceof Error ? error.message : 'Unknown error',
-                });
-        }
+    try {
+      const updatedJob = await prisma.job.update({
+        where: { id: Number(id) },
+        data: updatedData,
+      });
+      res.status(200).json(updatedJob);
+    } catch (error) {
+      console.error('Error updating job:', error);
+      res.status(500).json({ error: 'Failed to update job' });
     }
+  }
 
-    async applyForJob(req: Request, res: Response) {
-        const { id } = req.params;
+  // Delete a job
+  async deleteJob(req: Request, res: Response) {
+    const { id } = req.params;
 
-        try {
-            const job = await getPostingDetailService(Number(id));
-            if (!job)
-                return res.status(404).json({ message: 'Postingan pekerjaan tidak ditemukan.' });
-
-            if(job.expiry_date < new Date()) {
-                return res.status(400).json({ message: 'Postingan pekerjaan telah kadaluarsa.' });
-            }
-
-            if(job.published === false) {
-                return res.status(400).json({ message: 'Postingan pekerjaan tidak dipublikasikan.' });
-            }
-
-            if(job.requires_test === true) {
-                return res.status(400).json({ message: 'Postingan pekerjaan memerlukan tes.' });
-            }
-
-            const { userId } = req.body;
-            
-            const applicant = await createApplicant(userId, id);            
-            return res.status(201).json(applicant);
-        } catch (error) {
-            return res
-                .status(500)
-                .json({
-                    message: 'Gagal melamar pekerjaan.',
-                    error: error instanceof Error ? error.message : 'Unknown error',
-                });
-        }
+    try {
+      await prisma.job.delete({
+        where: { id: Number(id) },
+      });
+      res.status(200).json({ message: 'Job deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting job:', error);
+      res.status(500).json({ error: 'Failed to delete job' });
     }
+  }
 }

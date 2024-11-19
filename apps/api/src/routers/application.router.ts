@@ -1,9 +1,22 @@
-import express from 'express';
-import { ApplicationsController } from '@/controllers/application.controller';
+import { ApplicationController } from '@/controllers/application.controller';
+import { Router } from 'express';
 
-const router = express.Router();
-const applicationsController = new ApplicationsController();
+export class ApplicationRouter {
+  private router: Router;
+  private applicationController: ApplicationController;
 
-router.get('/', (req, res) => applicationsController.getApplications(req, res));
+  constructor() {
+    this.applicationController = new ApplicationController();
+    this.router = Router();
+    this.initializeRoutes();
+  }
 
-export default router;
+  private initializeRoutes(): void {
+    this.router.post('/apply', this.applicationController.applyJob);
+    this.router.get('/details', this.applicationController.getJobDetail);
+  }
+
+  getRouter(): Router {
+    return this.router;
+  }
+}

@@ -1,11 +1,14 @@
-import Image from 'next/image'
-import styles from './page.module.css'
-import JobApplicationInfo from '@/components/JobApplicationInfo'
+import Discover from '@/components/landing/Discover';
+import Filter from '@/components/landing/Filter';
+import Hero from '@/components/landing/Hero';
+import Wrapper from '@/components/wrapper';
 
 export default function Home() {
   return (
-    <>
-    <JobApplicationInfo />
-    </>
-  )
+    <Wrapper>
+      <Hero />
+      <Filter />
+      <Discover />
+    </Wrapper>
+  );
 }

@@ -1,15 +1,29 @@
-// pages/api/users.ts
-import { NextApiRequest, NextApiResponse } from 'next';
-import { calculateAge } from '@/utils/ageCount';
-import prisma from '@/prisma';
+import { UserController } from '@/controllers/user.controller';
+import { verifyToken } from '@/middleware/token';
+import { validateCheckEmail, validateRegisterUser } from '@/middleware/validator';
+import { Router } from 'express';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const users = await prisma.user.findMany();
+export class UserRouter {
+  private router: Router;
+  private userController: UserController;
 
-  const usersWithAge = users.map((user: { birth_date: any; }) => ({
-    ...user,
-    age: calculateAge(user.birth_date),
-  }));
+  constructor() {
+    this.userController = new UserController();
+    this.router = Router();
+    this.initializeRoutes();
+  }
 
-  res.json(usersWithAge);
+  private initializeRoutes(): void {
+    this.router.post('/', validateRegisterUser, this.userController.register);
+    this.router.post('/verify/:token', verifyToken, this.userController.verify);
+    this.router.post('/google', this.userController.googleRegisterOrLogin);
+    this.router.post('/login', this.userController.login);
+    this.router.post('/reset-password', verifyToken, this.userController.resetPassword);
+    this.router.post('/check-email', validateCheckEmail, this.userController.checkEmail);
+    this.router.post('/is-verified', verifyToken, this.userController.isVerified);
+  }
+
+  getRouter(): Router {
+    return this.router;
+  }
 }

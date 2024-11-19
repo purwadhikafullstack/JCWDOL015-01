@@ -1,14 +1,19 @@
-// Import necessary modules and routers
-import './types/custom';
-import express, { json, urlencoded, Express, Request, Response, NextFunction } from 'express';
+import express, {
+  json,
+  urlencoded,
+  Express,
+  Request,
+  Response,
+  NextFunction,
+  Router,
+} from 'express';
 import cors from 'cors';
 import { PORT } from './config';
-import analyticsRouter from './routers/analytics.router';
-import jobRouter from './routers/job.router';
-import applicantRouter from './routers/applicant.router'; 
-import { TestRouter } from './routers/test.router';
-import interviewRouter from './routers/interview.router';
-import applicationRouter from './routers/application.router';
+import { UserRouter } from './routers/user.router';
+import { AdminRouter } from './routers/admin.router';
+import { JobRouter } from './routers/job.router';
+import { CompanyRouter } from './routers/company.router';
+import { ApplicationRouter } from './routers/application.router';
 
 export default class App {
   private app: Express;
@@ -16,7 +21,7 @@ export default class App {
   constructor() {
     this.app = express();
     this.configure();
-    this.routes(); // Initialize routes
+    this.routes();
     this.handleError();
   }
 
@@ -27,46 +32,49 @@ export default class App {
   }
 
   private handleError(): void {
-    // Handle 404 Not Found
+    // not found
     this.app.use((req: Request, res: Response, next: NextFunction) => {
       if (req.path.includes('/api/')) {
-        res.status(404).send('Not found!');
+        res.status(404).send('Not found !');
       } else {
         next();
       }
     });
 
-    // Handle general errors
-    this.app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-      if (req.path.includes('/api/')) {
-        console.error('Error:', err.stack);
-        res.status(500).send('Error!');
-      } else {
-        next();
-      }
-    });
+    // error
+    this.app.use(
+      (err: Error, req: Request, res: Response, next: NextFunction) => {
+        if (req.path.includes('/api/')) {
+          console.error('Error : ', err.stack);
+          res.status(500).send('Error !');
+        } else {
+          next();
+        }
+      },
+    );
   }
 
   private routes(): void {
-    const testRouter = new TestRouter();
+    const userRouter = new UserRouter();
+    const adminRouter = new AdminRouter();
+    const jobRouter = new JobRouter();
+    const companyRouter = new CompanyRouter();
+    const applicationRouter = new ApplicationRouter();
 
-    // Public route
     this.app.get('/api', (req: Request, res: Response) => {
-      res.send(`Hello, This is my API`);
+      res.send(`Hello, Purwadhika Student API!`);
     });
 
-    // Mount routers with appropriate prefixes
-    this.app.use('/api/tests', testRouter.getRouter());
-    this.app.use('/api/applicants', applicantRouter);
-    this.app.use('/api/jobs', jobRouter); 
-    this.app.use('/api/interviews', interviewRouter);
-    this.app.use('/api/applications', applicationRouter);
-    this.app.use('/api/analytics', analyticsRouter);
+    this.app.use('/api/user', userRouter.getRouter());
+    this.app.use('/api/admin', adminRouter.getRouter());
+    this.app.use('/api/jobs', jobRouter.getRouter());
+    this.app.use('/api/company', companyRouter.getRouter());
+    this.app.use('/api/application', applicationRouter.getRouter());
   }
 
   public start(): void {
     this.app.listen(PORT, () => {
-      console.log(`  ➜  [API] Local:   http://localhost:${PORT}`);
+      console.log(`  ➜  [API] Local:   http://localhost:${PORT}/`);
     });
   }
 }
