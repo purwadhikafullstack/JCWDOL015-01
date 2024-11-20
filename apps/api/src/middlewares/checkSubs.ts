@@ -4,10 +4,11 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 export const checkSubscription = async (req: Request, res: Response, next: NextFunction) => {
-    const userId = req.body
+    const { id, userId } = req.body
 
     const subscription = await prisma.subscription.findFirst({
         where: {
+            id,
             userId,
             endDate: {
                 gte: new Date() // Subscription masih berlaku

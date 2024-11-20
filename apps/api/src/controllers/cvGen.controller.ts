@@ -14,7 +14,6 @@ export const generateCV = async (req: Request, res: Response) => {
                 education: true,
                 address: true,
                 profilePictureUrl: true,
-
             }
         });
 
@@ -38,6 +37,8 @@ export const generateCV = async (req: Request, res: Response) => {
         doc.fontSize(20).text(user.name ?? "", { align: 'center' });
         doc.moveDown();
         doc.fontSize(12).text(`Education: ${user.education || 'Tidak tersedia'}`);
+        doc.moveDown();
+        doc.fontSize(12).text('Experience')
         doc.moveDown();
         doc.text(`Address: ${user.address || 'Tidak tersedia'}`);
 

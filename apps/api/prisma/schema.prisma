@@ -85,10 +85,17 @@ model Subscription {
   type      SubscriptionType
   startDate DateTime
   endDate   DateTime
+  status    SubsStatus
 
-  user User @relation(fields: [userId], references: [id])
+  user     User             @relation(fields: [userId], references: [id])
+  payments PaymentHistory[]
 }
 
+enum SubsStatus {
+  Wait
+  Operating
+  Terminated
+}
 
 model Job {
   id           Int      @id @default(autoincrement())
@@ -186,18 +193,22 @@ model Notification {
 }
 
 model PaymentHistory {
-  id            Int           @id @default(autoincrement())
-  userId        Int
-  amount        Float
-  paymentMethod PaymentMethod
-  paymentDate   DateTime      @default(now())
-  transactionId String
-  status        PaymentStatus
+  id              Int           @id @default(autoincrement())
+  userId          Int
+  amount          Float
+  paymentMethod   PaymentMethod
+  paymentDate     DateTime      @default(now())
+  transactionId   String
+  status          PaymentStatus
+  subscripstionId Int
 
   user User @relation(fields: [userId], references: [id])
+
+  Subscription Subscription @relation(fields: [subscripstionId], references: [id])
 }
 
 enum SubscriptionType {
+  NORMAL
   STANDARD
   PROFESSIONAL
 }

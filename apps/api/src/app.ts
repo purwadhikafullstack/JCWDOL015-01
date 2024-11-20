@@ -9,7 +9,6 @@ import express, {
 import cors from 'cors';
 import { PORT } from './config';
 import router from './routers/all.router';
-// import './helpers/schedulerHelper';
 
 export default class App {
   private app: Express;

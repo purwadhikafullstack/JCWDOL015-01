@@ -34,7 +34,19 @@ export const addCompanyRating = async (req: Request, res: Response) => {
     try {
         const { userId, companyId, position, salaryEstimate, cultureScore, workLifeBalanceScore, facilitiesScore, careerOpportunitiesScore, comment, rating } = req.body;
 
-        // Validasi rating dalam rentang 1-5
+        if (!userId) {
+            return res.status(400).json({ message: 'User ID is required' });
+        }
+
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { isVerified: true, subscriptionEndDate: true }
+        });
+
+        if (!user || !user.isVerified || new Date(user.subscriptionEndDate ?? 0) < new Date()) {
+            return res.status(403).json({ message: 'User tidak terverifikasi atau subscription sudah kedaluwarsa' });
+        }
+
         if ([cultureScore, workLifeBalanceScore, facilitiesScore, careerOpportunitiesScore].some(score => score < 1 || score > 5)) {
             return res.status(400).json({ message: 'Nilai rating harus dalam rentang 1-5' });
         }
@@ -64,6 +76,19 @@ export const addCompanyRating = async (req: Request, res: Response) => {
 export const salaryReview = async (req: Request, res: Response) => {
     try {
         const { companyId, position, salaryEstimate, userId, comment } = req.body;
+
+        if (!userId) {
+            return res.status(400).json({ message: 'User ID is required' });
+        }
+
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { isVerified: true, subscriptionEndDate: true }
+        });
+
+        if (!user || !user.isVerified || new Date(user.subscriptionEndDate ?? 0) < new Date()) {
+            return res.status(403).json({ message: 'User tidak terverifikasi atau subscription sudah kedaluwarsa' });
+        }
 
         const review = await prisma.companyReview.create({
             data: {
