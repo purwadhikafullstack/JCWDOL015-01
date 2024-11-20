@@ -33,11 +33,18 @@ export class ApplicationController {
         return res.status(404).json({ ok: false, message: 'Job not found.' });
       }
 
+      // Check if authenticated
+      if (!req.user) {
+        return res
+          .status(401)
+          .json({ ok: false, message: 'User not authenticated.' });
+      }
+
       // Create the application record
       const application = await prisma.application.create({
         data: {
           jobId,
-          userId: req?.user?.id, // Assuming user is authenticated
+          userId: req.user?.id, // Assuming user is authenticated
           expectedSalary: parseFloat(expectedSalary),
           resumeUrl,
         },
@@ -63,7 +70,7 @@ export class ApplicationController {
         .status(500)
         .json({ ok: false, message: 'Failed to apply for job' });
     }
-  },
+  }
 
   // Fetch job details (optional)
   async getJobDetail(req: Request, res: Response) {
@@ -95,7 +102,7 @@ export class ApplicationController {
           jobLocation: job.location,
           jobSalary: job.salary,
           jobTags: job.tags,
-          jobExpiryDate: job.expiryDate,
+          jobExpiryDate: job.expiry_date,
           companyInfo: {
             companyName: job.admin.companyName,
             companyDescription: job.admin.companyDescription,
@@ -107,5 +114,5 @@ export class ApplicationController {
       console.error(error);
       return res.status(500).json({ ok: false, message: 'Error fetching job details' });
     }
-  },
+  }
 };

@@ -20,9 +20,10 @@ export default function Hero() {
         <Image
           src={images[currentImage]}
           alt={`Hero Image ${currentImage + 1}`}
-          layout="fill"
-          objectFit="cover"
-          className="opacity-60 transition-opacity duration-1000"
+          width={1024}
+          height={1024}
+          className="opacity-60 transition-opacity duration-1000 object-cover w-full h-full"
+          priority
         />
       </div>
       <div className="relative z-10 flex flex-col justify-center items-center text-center h-full px-4 text-white">

@@ -9,7 +9,7 @@
     "forceConsistentCasingInFileNames": true,
     "outDir": "./dist",
     "baseUrl": ".",
-    "types": ["./src/types/custom.d.ts"],
+    "types": ["custom.d.ts"],
     "paths": {
       "@/*": ["./src/*"]
     },

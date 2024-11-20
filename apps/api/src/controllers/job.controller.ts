@@ -43,7 +43,7 @@ export class JobController {
       const jobs = await prisma.job.findMany({
         include: {
           admin: true,
-          applications: true,
+          applicant: true,
         },
       });
       res.status(200).json(jobs);
@@ -62,7 +62,7 @@ export class JobController {
       });
 
       if (!locations || locations.length === 0) {
-        throw new Error('No locations found');
+        // throw new Error('No locations found');
       }
 
       res.status(200).json(locations.map(location => location.location)); // Return array of locations
@@ -92,7 +92,7 @@ export class JobController {
         where: filters,
         include: {
           admin: true,
-          applications: true,
+          applicant: true,
         },
       });
       res.status(200).json(jobs);
@@ -113,9 +113,11 @@ export class JobController {
           description: jobData.description,
           location: jobData.location,
           salary: jobData.salary,
-          expiryDate: jobData.expiryDate,
+          category: jobData.category,
+          admin: jobData.admin,
+          expiry_date: jobData.expiryDate,
           tags: jobData.tags,
-          remoteOption: jobData.remoteOption,
+          remote_option: jobData.remoteOption,
           adminId: jobData.adminId,
         },
       });

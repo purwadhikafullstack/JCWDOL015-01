@@ -29,7 +29,14 @@ import { PrismaClient } from '@prisma/client';
     }) => {
         try {
             return await prisma.job.create({
-                data,
+                data: {
+                    ...data,
+                    admin: {
+                        connect: {
+                            id: data.admin_id,
+                        },
+                    },
+                },
             });
         } catch (error) {
             console.error('Error creating job posting:', error);

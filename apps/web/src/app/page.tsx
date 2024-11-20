@@ -1,3 +1,4 @@
+'use client';
 import Discover from '@/components/landing/Discover';
 import Filter from '@/components/landing/Filter';
 import Hero from '@/components/landing/Hero';
@@ -7,7 +8,7 @@ export default function Home() {
   return (
     <Wrapper>
       <Hero />
-      <Filter />
+      <Filter onFilterChange={() => {}} />
       <Discover />
     </Wrapper>
   );

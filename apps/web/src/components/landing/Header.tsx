@@ -22,6 +22,7 @@ export const Header = () => {
             width={1598}
             height={419}
             className="w-60 h-16"
+            priority
           />
         </Link>
       </div>
