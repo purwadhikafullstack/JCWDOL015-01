@@ -10,7 +10,6 @@ export const verifyUserStatus = async (req: Request, res: Response, next: NextFu
     if (!userId) return res.status(400).send({message: 'User was not found on request'})
     
     try {
-        // Ambil user berdasarkan ID yang diberikan
         const user = await prisma.user.findUnique({
             where: { id: userId },
             select: {
@@ -21,15 +20,11 @@ export const verifyUserStatus = async (req: Request, res: Response, next: NextFu
             },
         });
 
-        // Cek apakah user ditemukan
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // Logika verifikasi status
         const currentDate = new Date();
-
-        // Jika user memiliki subscription yang masih aktif, set isVerified menjadi true
         if (user.subscriptionType && user.subscriptionEndDate && user.subscriptionEndDate > currentDate) {
             await prisma.user.update({
                 where: { id: userId },
@@ -37,7 +32,6 @@ export const verifyUserStatus = async (req: Request, res: Response, next: NextFu
             });
             next();
         } else {
-            // Jika tidak memiliki subscription aktif, set isVerified menjadi false
             await prisma.user.update({
                 where: { id: userId },
                 data: { isVerified: false },

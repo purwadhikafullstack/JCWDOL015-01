@@ -72,11 +72,10 @@ export const completeAssessment = async (req: Request, res: Response) => {
 
 // Gunakan ID pengguna statis atau hardcode
 export const getUserAssessments = async (req: Request, res: Response) => {
-  const userId = 1;  // Ganti dengan ID yang valid untuk pengujian
-
+  const userId = req.body
   try {
     const assessments = await prisma.skillAssessment.findMany({
-      where: { developerId: userId },  // Gunakan ID statis
+      where: { developerId: userId },
       include: { Question: true },
     });
 

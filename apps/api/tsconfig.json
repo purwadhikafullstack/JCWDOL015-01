@@ -9,15 +9,28 @@
     "outDir": "./dist",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": [
+        "./src/*"
+      ]
     },
-    "typeRoots": ["./node_modules/@types", "./src/types"],
-    "types": ["node", "express"]
+    "typeRoots": [
+      "./node_modules/@types",
+      "./src/types"
+    ],
+    "types": [
+      "node",
+      "express"
+    ]
   },
   "ts-node": {
     "transpileOnly": true
   },
-  // "include": ["src/**/*"],
-  "include": ["**/*.ts", "types/**/*.d.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "src/**/*",
+    "**/*.ts",
+    "types/**/*.d.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

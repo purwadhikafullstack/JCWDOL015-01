@@ -43,7 +43,7 @@ export const purchaseSubscription = async (req: Request, res: Response) => {
                     create: {
                         userId,
                         amount: selectedCategory.cost,
-                        paymentMethod,
+                        paymentMethod: paymentMethod === "No Methods" ? PaymentMethod.GATEWAY : PaymentMethod.MANUAL,
                         paymentDate: new Date(),
                         status: paymentMethod === 'MANUAL' ? PaymentStatus.PENDING : PaymentStatus.APPROVED,
                         transactionId: myUUID
@@ -69,13 +69,13 @@ export const approvePayment = async (req: Request, res: Response) => {
 
     const selectedCategory = subscriptionCategories[subscriptionType as keyof typeof subscriptionCategories]
     if (!selectedCategory) {
-        return res.status(400).json({message: "Subscription Type is not Valid"})
+        return res.status(400).json({ message: "Subscription Type is not Valid" })
     }
 
     try {
         const existingSubscription = await prisma.subscription.findFirst({
-            where: { 
-                id, 
+            where: {
+                id,
                 userId,
             }, include: {
                 payments: true
@@ -96,7 +96,7 @@ export const approvePayment = async (req: Request, res: Response) => {
             },
         });
         await prisma.paymentHistory.updateMany({
-            where: {subscripstionId: existingSubscription.id, status: PaymentStatus.PENDING},
+            where: { subscripstionId: existingSubscription.id, status: PaymentStatus.PENDING },
             data: { status: PaymentStatus.APPROVED }
         })
 
@@ -123,6 +123,23 @@ export const approvePayment = async (req: Request, res: Response) => {
         return res.status(500).json({ message: 'Error approving payment', error });
     }
 };
+
+export const getPendingSubscriptions = async (req: Request, res: Response) => {
+    try {
+        const pendingSubscriptions = await prisma.subscription.findMany({
+            where: { status: SubsStatus.Wait },
+            include: {
+                user: true,
+                payments: true,
+            },
+        });
+
+        return res.status(200).json(pendingSubscriptions);
+    } catch (error) {
+        return res.status(500).json({ message: "Error fetching pending subscriptions", error });
+    }
+};
+
 
 
 const subscriptionCategories = {
@@ -175,10 +192,10 @@ export const getUserSubsandPayDetails = async (req: Request, res: Response) => {
         if (user) {
             res.status(200).json(user)
         } else {
-            res.status(400).send({message: "There is no Payment Approved"})
+            res.status(400).send({ message: "There is no Payment Approved" })
         }
     } catch (error) {
-        res.status(500).send({message: "Error on Server"})
+        res.status(500).send({ message: "Error on Server" })
         console.error(error)
     }
 }

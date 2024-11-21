@@ -1,79 +1,56 @@
-'use client'
-import { useEffect, useState } from 'react';
-import axios from 'axios';
-import Link from 'next/link';
-const PublicURL = process.env.NEXT_PUBLIC_BASE_API_URL
+'use client';
 
-interface Subscription {
-    type: string;
-    cost: number;
-    features: string[];
-    durationInDays: number;
-}
+import React, { useEffect, useState } from 'react';
+import { getAllSubscriptionCategories, purchaseSubscription, getUserSubscriptions } from '@/services/subsServices';
+import SubscriptionCard from '@/components/Subscriptions/subsCards';
+import UserSubs from '@/components/Subscriptions/userSubs';
+import { SubscriptionCategory, UserSubscription } from '@/types/subscriptions';
 
-const Subscriptions = () => {
-    const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string | null>(null);
+const SubscriptionPage: React.FC = () => {
+    const [categories, setCategories] = useState<SubscriptionCategory[]>([]);
+    const [userSubscription, setUserSubscription] = useState<UserSubscription | null>(null);
+    const userId = 1; // Replace with actual userId logic
 
     useEffect(() => {
-        const fetchSubscriptions = async () => {
-            try {
-                const response = await axios.get(`${PublicURL}/subscriptions/categories`, {
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-                setSubscriptions(response.data);
-                setLoading(false);
-            } catch (err) {
-                setError('Gagal mengambil data');
-                setLoading(false);
+        async function fetchData() {
+            const subsCategories = await getAllSubscriptionCategories();
+            setCategories(subsCategories);
+
+            const user = await getUserSubscriptions(userId);
+            if (user?.subscriptions?.length) {
+                setUserSubscription(user.subscriptions[0]); // Assuming the first is active
             }
-        };
+        }
 
-        fetchSubscriptions();
-    }, []);
+        fetchData();
+    }, [userId]);
 
-    if (loading) {
-        return (
-            <div className='flex justify-center items-center h-screen'>
-                <p className='text-xl'>Loading...</p>
-            </div>
-        )
-    }
-
-    if (error) {
-        return <p>{error}</p>;
-    }
+    const handlePurchase = async (type: string) => {
+        try {
+            const paymentMethod = 'ONLINE'; // Mocking payment method
+            await purchaseSubscription(userId, type, paymentMethod);
+            alert('Subscription purchased successfully!');
+            window.location.reload(); // Refresh to update active subscription
+        } catch (error) {
+            console.error('Error purchasing subscription:', error);
+            alert('Failed to purchase subscription.');
+        }
+    };
 
     return (
-        <div className="container mx-auto px-4 py-6">
-            <h1 className="text-3xl font-semibold text-center text-gray-800 mb-6">Kategori Langganan</h1>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {subscriptions.map((subscription) => (
-                    <div
-                        key={subscription.type}
-                        className="bg-white shadow-lg rounded-lg overflow-hidden border border-gray-200 transform transition-all hover:scale-105 hover:shadow-xl"
-                    >
-                        <div className="p-6">
-                            <h2 className="text-2xl font-semibold text-gray-800 mb-3">{subscription.type}</h2>
-                            <p className="text-lg text-gray-600 mb-2">Biaya: <span className="font-bold text-green-600">IDR {subscription.cost.toLocaleString()}</span></p>
-                            <p className="text-lg text-gray-600 mb-4">Durasi: <span className="font-bold text-blue-600">{subscription.durationInDays} hari</span></p>
-                            <div>
-                                <h3 className="text-xl font-medium text-gray-700 mb-2">Fitur:</h3>
-                                <ul className="list-inside list-disc text-gray-600">
-                                    {subscription.features.map((feature, idx) => (
-                                        <li key={idx} className="mb-1">{feature}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                        </div>
-                        <Link href={'/subscriptions/purchase'} passHref><button>Buy Subs</button></Link>
-                    </div>
+        <div className="subscription-page">
+            {userSubscription ? (
+                <UserSubs subscription={userSubscription} />
+            ) : (
+                <p>No active subscription. Please choose one below.</p>
+            )}
+            <div className="subscription-cards">
+                {categories.map((category, index) => (
+                    <SubscriptionCard key={index} category={category} onPurchase={handlePurchase} />
                 ))}
             </div>
         </div>
-    )
-}
-export default Subscriptions
+    );
+};
+
+export default SubscriptionPage;

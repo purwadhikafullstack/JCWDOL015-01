@@ -11,7 +11,7 @@ export const checkSubscription = async (req: Request, res: Response, next: NextF
             id,
             userId,
             endDate: {
-                gte: new Date() // Subscription masih berlaku
+                gte: new Date()
             }
         }
     });
