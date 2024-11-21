@@ -19,7 +19,7 @@ export const registerAdmin = async (data: IRegAdmin) => {
 
 export const loginAdmin = async (data: ILoginAdmin) => {
   try {
-    const res = await axios.post(`${link}admin/login`, data, {
+    const res = await axios.post(`${link}/admin/login`, data, {
       headers: {
         'Content-Type': 'application/json',
       },

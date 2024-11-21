@@ -287,4 +287,35 @@ export class UserController {
       });
     }
   }
+
+  async setDefaultPassword(req: Request, res: Response) {
+    try {
+      const { email, password } = req.body;
+      const user = await prisma.user.findUnique({
+        where: { email }
+      });
+
+      const salt = await genSalt(10);
+      const hashedPassword = await hash(password, salt);
+
+      await prisma.user.update({
+        where: { email },
+        data: {
+          password: hashedPassword,
+          isBlocked: false,
+        },
+      });
+
+      return res.status(200).send({
+        status: 'success',
+        message: 'Password reset successful',
+      });
+    } catch (error) {
+      return res.status(400).send({
+        status: 'error',
+        message: 'Error',
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
 }

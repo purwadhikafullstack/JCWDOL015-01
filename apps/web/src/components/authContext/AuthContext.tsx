@@ -5,13 +5,14 @@ import { ILoginAdmin } from '@/types/admin';
 import { ICheckEmail, ILogin, IReset } from '@/types/user';
 import { FormikHelpers } from 'formik';
 import { useRouter } from 'next/navigation';
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import { clearProfile, setProfile } from '@/app/store/slices/userSlice';
 
 interface AuthContextType {
   token: string | null;
+  tokenAdmin: string | null;
   onLogin: (data: ILogin, action: FormikHelpers<ILogin>) => void;
   onLogout: () => void;
   onLoginAdmin: (data: ILoginAdmin, action: FormikHelpers<ILoginAdmin>) => void;
@@ -32,6 +33,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [verified, setVerified] = useState<boolean | null>(null);
   const router = useRouter();
   const dispatch = useDispatch();
+
+  // Initialize token from localStorage when the component mounts
+  useEffect(() => {
+    const storedToken = localStorage.getItem('token');
+    if (storedToken) {
+      setToken(storedToken);
+    }
+
+    const storedAdminToken = localStorage.getItem('tokenAdmin');
+    if (storedAdminToken) {
+      setTokenAdmin(storedAdminToken);
+    }
+  }, []);
+
   const onLogin = async (data: ILogin, action: FormikHelpers<ILogin>) => {
     try {
       const { result, ok } = await loginUser(data);
@@ -87,7 +102,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       const { result, ok } = await loginAdmin(data);
       if (ok && result.data.token) {
+        localStorage.setItem('tokenAdmin', result.data.token);
+        const { password, ...adminWithoutPassword } = result.data.Admin;
+        adminWithoutPassword.isAdmin = true;
+        localStorage.setItem('user', JSON.stringify(adminWithoutPassword));
         setTokenAdmin(result.data.token);
+        dispatch(setProfile(adminWithoutPassword));
         toast.success('Login successful');
         action.resetForm();
         router.back();
@@ -147,6 +167,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     <AuthContext.Provider
       value={{
         token,
+        tokenAdmin,
         onLogin,
         onVerified,
         verified,
@@ -164,6 +185,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
+  
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }

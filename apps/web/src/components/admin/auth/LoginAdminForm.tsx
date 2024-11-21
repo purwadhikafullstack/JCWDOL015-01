@@ -13,19 +13,20 @@ const LoginSchema = yup.object().shape({
 });
 
 export default function LoginAdminForm() {
-  const { onLogin } = useAuth();
+  const { onLoginAdmin } = useAuth();
 
   return (
     <Formik
       initialValues={{ email: '', password: '' }}
       validationSchema={LoginSchema}
       onSubmit={(values, action) => {
-        onLogin(values, action);
+        onLoginAdmin(values, action);
       }}
     >
       {() => {
         return (
           <Form>
+            <h1>Login Admin</h1>
             <div className=" min-w-[30vw]">
               <div className="mt-10">
                 <label className="block text-sm font-medium leading-6 text-gray-900">

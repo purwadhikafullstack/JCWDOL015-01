@@ -5,12 +5,16 @@ import { useAuth } from '../authContext/AuthContext';
 import { usePathname } from 'next/navigation';
 
 export const Header = () => {
-  const { token, onLogout } = useAuth();
+  const { token, tokenAdmin, onLogout } = useAuth();
   const pathname = usePathname();
 
-  const isAdmin = pathname.startsWith('/admin');
+  let isAdmin = pathname.startsWith('/admin');
+  if (tokenAdmin) {
+    isAdmin = true;
+  }
 
   const isActive = (path: string) => pathname.startsWith(path);
+  console.log();
 
   return (
     <div className="flex flex-row p-2 h-20 w-full items-center justify-between gap-5 bg-blue-600 text-white font-bold">
@@ -72,10 +76,20 @@ export const Header = () => {
             <span className="border-cyan-500 border-y-8 h-20 flex items-center duration-100">
               For Admin
             </span>
-            <div className="flex items-center">|</div>
-            <Link href="/admin/dashboard" className="flex items-center">
-              Dashboard
-            </Link>
+            {token || tokenAdmin ? (
+              <div className="flex flex-row justify-center gap-2">
+                <div className="flex items-center">|</div>
+                {tokenAdmin && (
+                  <Link href="/dashboard" className="flex items-center mr-5">
+                    Dashboard
+                  </Link>
+                )}
+
+                <button onClick={onLogout} className="flex items-center">
+                  Logout
+                </button>
+              </div>
+            ) : null}
           </div>
         ) : (
           <div className="flex flex-row justify-center gap-2">
@@ -86,7 +100,7 @@ export const Header = () => {
               For Admin
             </Link>
             <div className="flex items-center">|</div>
-            {token ? (
+            {tokenAdmin ? (
               <div className="flex flex-row justify-center gap-2">
                 <Link href="/user/dashboard" className="flex items-center">
                   Dashboard

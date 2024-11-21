@@ -59,6 +59,7 @@ export class AdminController {
       if (!isMatch) throw new Error('Password not match');
 
       const payload = { id: Admin.id, email: Admin.email };
+      
       const token = sign(payload, process.env.JWT!);
 
       return res.status(200).send({

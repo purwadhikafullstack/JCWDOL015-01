@@ -12,17 +12,28 @@ import {
   getUserLocationController,
 } from "../controllers/analytics.controller";
 
-const router = express.Router();
+export class AnalyticsRouter {
+  private router: express.Router;
 
-router.get("/age-distribution", getUserAgeController);
-router.get("/gender-distribution", getUserGenderController);
-router.get("/location-distribution", getUserLocationController);
-router.get("/salary-trends", getSalaryTrendsController);
-router.get("/job-interests", getJobInterestController);
-router.get("/total-applicants", getTotalApplicantController);
-router.get("/total-accepted-applicants", getTotalAcceptedController);
-router.get("/total-rejected-applicants", getTotalRejectedController);
-router.get("/total-job-posting", getTotalJobController);
-router.get('/incoming-interviews', getIncomingInterviewController);
+  constructor() {
+    this.router = express.Router();
+    this.initializeRoutes();
+  }
 
-export default router;
+  private initializeRoutes(): void {
+    this.router.get("/age-distribution", getUserAgeController);
+    this.router.get("/gender-distribution", getUserGenderController);
+    this.router.get("/location-distribution", getUserLocationController);
+    this.router.get("/salary-trends", getSalaryTrendsController);
+    this.router.get("/job-interests", getJobInterestController);
+    this.router.get("/total-applicants", getTotalApplicantController);
+    this.router.get("/total-accepted-applicants", getTotalAcceptedController);
+    this.router.get("/total-rejected-applicants", getTotalRejectedController);
+    this.router.get("/total-job-posting", getTotalJobController);
+    this.router.get('/incoming-interviews', getIncomingInterviewController);
+  }
+
+  getRouter(): express.Router {
+    return this.router;
+  }
+}

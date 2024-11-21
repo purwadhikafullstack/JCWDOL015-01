@@ -4,13 +4,15 @@ import prisma from "@/prisma";
 export async function getUserAgeDistribution() {
   try {
     const userAgeData = await prisma.user.findMany({
-      select: { birth_date: true },
+      select: { birthDate: true },
     });
 
     const ageDistribution: Record<string, number> = {};
 
     userAgeData.forEach((user) => {
-      const age = new Date().getFullYear() - new Date(user.birth_date).getFullYear();
+      // calculate age
+      if(user.birthDate === null) return
+      const age = new Date().getFullYear() - new Date(user.birthDate).getFullYear();
       const decade = Math.floor(age / 10) * 10;
       if (ageDistribution[decade.toString()]) {
         ageDistribution[decade.toString()] += 1;
@@ -50,6 +52,7 @@ export async function getUserLocationDistribution() {
       users.forEach((user) => {
         // get city from address
         const location = user.address;
+        if(location === null) return
         if (locationCounts[location]) {
           locationCounts[location] += 1;
         } else {
@@ -127,7 +130,7 @@ export async function getTotalAcceptedApplicant() {
   try {
     const totalAcceptedApplicant = await prisma.applicant.count({
       where: {
-        status: "accepted"
+        status: "ACCEPTED"
       }
     });
     return totalAcceptedApplicant;
@@ -141,7 +144,7 @@ export async function getTotalRejectedApplicant() {
   try {
     const totalRejectedApplicant = await prisma.applicant.count({
       where: {
-        status: "rejected"
+        status: "REJECTED"
       }
     });
     return totalRejectedApplicant;
