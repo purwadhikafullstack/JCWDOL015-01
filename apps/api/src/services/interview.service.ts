@@ -23,7 +23,7 @@ export const createSchedule = async (input: CreateScheduleInput): Promise<Interv
   });
 
   // // Implement the email notification logic
-  // await sendEmailNotification(schedule.applicant_id);
+  await sendEmailNotification(schedule.applicant_id);
 
   return schedule;
 };
@@ -66,7 +66,7 @@ export const updateSchedule = async (
 
     input.date_time = new Date(`${newDate}T${newTime}:00.000Z`);    
   }
-  return await prisma.interviewSchedule.update({
+  const schedule = await prisma.interviewSchedule.update({
     where: { id },
     data: {
       ...(input.date_time && { date_time: input.date_time }),
@@ -74,6 +74,10 @@ export const updateSchedule = async (
       ...(input.status && { status: input.status as InterviewStatus }), // Cast to InterviewStatus
     },
   });
+
+  await sendEmailNotification(schedule.applicant_id);
+
+  return schedule
 };
 
 // Function to delete an interview schedule
@@ -101,17 +105,24 @@ export const sendEmailNotification = async (applicantId: number) => {
     // Set up Nodemailer transporter
     const nodemailer = require('nodemailer');
     const emailService = nodemailer.createTransport({
-      host: 'smtp.example.com', // Replace with your SMTP server
-      port: 587,
+      host: 'sandbox.smtp.mailtrap.io', // Replace with your SMTP server
+      port: 2525,
       secure: false, // true for 465, false for other ports
       auth: {
-        user: 'your-email@example.com', // Replace with your email
-        pass: 'your-email-password', // Replace with your email password
+        user: 'f71ddad06f8bf7', // Replace with your email
+        pass: '7c6f2fd966189c', // Replace with your email password
       },
     });
   
     const subject = 'Interview Schedule Confirmation';
-    const text = `Dear ${applicant.user.name},\n\nYou have an interview scheduled on ${date_time.toISOString()} at ${location}.\n\nBest regards,\nYour Team`;
+  
+    // Prepare the email content
+    const newDate = date_time.toISOString().split('T')[0];
+    const newTime = date_time.toISOString().split('T')[1].substring(0, 5);
+  
+    const formattedDateTime = `${newDate} at ${newTime}`;
+
+    const text = `Dear ${applicant.user.name},\n\nYou have an interview scheduled on ${formattedDateTime} at ${location}.\n\nBest regards,\nYour Team`;
   
     // Send the email notification
     await emailService.sendMail({
@@ -123,4 +134,62 @@ export const sendEmailNotification = async (applicantId: number) => {
     // Handle cases where applicant or interview schedule is not found
     console.error('Applicant or interview schedule not found for ID:', applicantId);
   }
+};
+
+
+export const sendEmailReminder = async () => {
+  // Fetch the next day's interview schedule
+  const today = new Date();
+  const tomorrow = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+  const tomorrowDate = tomorrow.toISOString().split('T')[0];
+
+  // console.log(new Date(tomorrowDate).toDateString());
+  const interviewSchedules = await prisma.interviewSchedule.findMany({
+    where: { date_time: { gte: new Date(tomorrowDate), lt: new Date(tomorrowDate + 'T23:59:59.000Z') } },
+    orderBy: { date_time: 'asc' }, // Get the earliest scheduled interview
+    include: {
+      applicant: {
+        include: {
+          user: true, // Include user details if needed
+        },
+      },
+    },
+  });
+
+  // console.log(interviewSchedules);
+  
+  interviewSchedules && interviewSchedules.forEach(async (interviewSchedule) => {
+    
+    const { date_time, location } = interviewSchedule; // Access interview details
+  
+    // Set up Nodemailer transporter
+    const nodemailer = require('nodemailer');
+    const emailService = nodemailer.createTransport({
+      host: 'sandbox.smtp.mailtrap.io', // Replace with your SMTP server
+      port: 2525,
+      secure: false, // true for 465, false for other ports
+      auth: {
+        user: 'f71ddad06f8bf7', // Replace with your email
+        pass: '7c6f2fd966189c', // Replace with your email password
+      },
+    });
+  
+    const subject = 'Interview Schedule Reminder';
+  
+    // Prepare the email content
+    const newDate = date_time.toISOString().split('T')[0];
+    const newTime = date_time.toISOString().split('T')[1].substring(0, 5);
+  
+    const formattedDateTime = `${new Date(newDate).toDateString()} at ${newTime}`;
+
+    const text = `Dear ${interviewSchedule.applicant.user.name},\n\nThis is a reminder for your interview scheduled on ${formattedDateTime} at ${location}.\n\nThank you,\nYour Team`;
+  
+    // Send the email notification
+    await emailService.sendMail({
+      to: interviewSchedule.applicant.user.email,
+      subject,
+      text,
+    });
+  
+  })
 };

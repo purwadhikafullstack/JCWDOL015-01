@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import prisma from '@/prisma';
 import { InterviewSchedule, InterviewStatus } from '@prisma/client';
-import { createSchedule as createScheduleService, getSchedules as getSchedulesService, getSchedulesById as getSchedulesByIdService, updateSchedule as updateScheduleService, deleteSchedule as deleteScheduleService, sendEmailNotification, getSchedulesById } from '@/services/interview.service';
+import { createSchedule as createScheduleService, getSchedules as getSchedulesService, getSchedulesById as getSchedulesByIdService, updateSchedule as updateScheduleService, deleteSchedule as deleteScheduleService, sendEmailNotification, getSchedulesById, sendEmailReminder } from '@/services/interview.service';
 
 export class InterviewController {
   async createSchedule(req: Request, res: Response) {
@@ -89,6 +89,19 @@ export class InterviewController {
       console.error(error);
       return res.status(500).json({
         message: 'Gagal menghapus jadwal wawancara.',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  }
+
+  async sendReminder(req: Request, res: Response) {
+    try {
+      await sendEmailReminder();
+      return res.status(200).json({ message: 'Email notification sent successfully.' });
+    } catch (error: unknown) {
+      console.error(error);
+      return res.status(500).json({
+        message: 'Gagal mengirim email notifikasi.',
         error: error instanceof Error ? error.message : 'Unknown error',
       });
     }

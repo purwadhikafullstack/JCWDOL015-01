@@ -17,6 +17,7 @@ export class InterviewRouter {
 
     // Get interview schedules (GET)
     this.router.get('/', this.interviewController.getSchedules);
+    this.router.get('/send-reminder', this.interviewController.sendReminder);
 
     // Get interview schedules (GET)
     this.router.get('/:id', this.interviewController.getSchedulesById);
@@ -26,6 +27,7 @@ export class InterviewRouter {
 
     // Delete interview schedule (DELETE)
     this.router.delete('/:id', this.interviewController.deleteSchedule);
+
   }
 
   public getRouter(): Router {
