@@ -105,7 +105,7 @@ export const Header = () => {
             )}
 
             {!tokenAdmin && !token && (
-              <div>
+              <div className="flex flex-row justify-center gap-2">
                 <Link
                   href="/admin"
                   className="border-white hover:border-y-8 h-20 flex items-center duration-100"

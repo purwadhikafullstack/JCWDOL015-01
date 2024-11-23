@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { 
   getAllApplicantsController, 
   getApplicantsByJobPostingController, 
@@ -10,30 +10,26 @@ import {
   interviewApplicantController
 } from '@/controllers/applicant.controller';
 
-const router = Router();
+export class ApplicantRouter {
+  private router: Router;
 
-// Route to get all applicants
-router.get('/', getAllApplicantsController);
+  constructor() {
+    this.router = Router();
+    this.routes();
+  }
 
-// Route to get applicants by job posting ID with optional filters
-router.get('/job-postings/:jobId/applicants', getApplicantsByJobPostingController);
+  private routes(): void {
+    this.router.get('/', getAllApplicantsController);
+    this.router.get('/job-postings/:jobId/applicants', getApplicantsByJobPostingController);
+    this.router.get('/:id', getApplicantByIdController);
+    this.router.put('/:id/accept/:jobId', acceptApplicantController);
+    this.router.put('/:id/reject/:jobId', rejectApplicantController);
+    this.router.put('/:id/in_process/:jobId', inProcessApplicantController);
+    this.router.put('/:id/interview/:jobId', interviewApplicantController);
+    this.router.get('/test-results', fetchApplicantTestResultsController);
+  }
 
-// Route to get a single applicant by ID
-router.get('/:id', getApplicantByIdController);
-
-// Route to accept an applicant
-router.put('/:id/accept/:jobId', acceptApplicantController);
-
-// Route to reject an applicant
-router.put('/:id/reject/:jobId', rejectApplicantController);
-
-// Route to in_proccess an applicant
-router.put('/:id/in_process/:jobId', inProcessApplicantController);
-
-// Route to interview an applicant
-router.put('/:id/interview/:jobId', interviewApplicantController);
-
-// Route to fetch applicant test results
-router.get('/test-results', fetchApplicantTestResultsController);
-
-export default router;
+  public getRouter(): Router {
+    return this.router;
+  }
+}

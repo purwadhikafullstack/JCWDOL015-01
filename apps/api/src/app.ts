@@ -16,6 +16,7 @@ import { TestRouter } from './routers/test.router';
 import { CompanyRouter } from './routers/company.router';
 import { ApplicationRouter } from './routers/application.router';
 import { AnalyticsRouter } from './routers/analytics.router';
+import { ApplicantRouter} from './routers/applicant.router';
 
 export default class App {
   private app: Express;
@@ -64,6 +65,7 @@ export default class App {
     const applicationRouter = new ApplicationRouter();
     const analyticsRouter = new AnalyticsRouter();
     const testRouter = new TestRouter();
+    const applicantRouter = new ApplicantRouter();
 
     this.app.get('/api', (req: Request, res: Response) => {
       res.send(`Hello, Purwadhika Student API!`);
@@ -76,6 +78,7 @@ export default class App {
     this.app.use('/api/company', companyRouter.getRouter());
     this.app.use('/api/analytics', analyticsRouter.getRouter());
     this.app.use('/api/application', applicationRouter.getRouter());
+    this.app.use('/api/applicants', applicantRouter.getRouter());
 
   }
 
