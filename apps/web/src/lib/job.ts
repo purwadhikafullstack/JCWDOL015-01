@@ -2,6 +2,7 @@ import { IFilters } from '@/types/job';
 import axios from 'axios';
 
 const link = process.env.NEXT_PUBLIC_API_URL;
+const apiLink = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
 
 export const fetchAllJobs = async () => {
   try {
@@ -43,7 +44,7 @@ export const fetchLocations = async () => {
 export const fetchJobsByFilter = async (filters: IFilters) => {
   try {
     const { location, remoteOption, tags } = filters;
-    const response = await axios.get('/api/jobs', {
+    const response = await axios.get(`${apiLink}/jobs`, {
       params: { location, remoteOption, tags },
     });
     return response.data;  // Return filtered jobs

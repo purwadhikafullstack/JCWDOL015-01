@@ -8,6 +8,7 @@ import {
   getJobPostings as getPostingsService,
   getTotalJobs as getTotalJobsService,
   getJobPostingDetail as getPostingDetailService,
+  getLocations as getLocationsService,
 } from '@/services/job.service';
 
 import { getTestsByJobId } from '@/services/test.service';
@@ -258,6 +259,18 @@ export class JobController {
     } catch (error) {
       return res.status(500).json({
         message: 'Gagal melamar pekerjaan.',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  }
+
+  async getLocations(req: Request, res: Response) {
+    try {
+      const locations = await getLocationsService();
+      return res.status(200).json(locations);
+    } catch (error) {
+      return res.status(500).json({
+        message: 'Gagal mengambil daftar lokasi.',
         error: error instanceof Error ? error.message : 'Unknown error',
       });
     }

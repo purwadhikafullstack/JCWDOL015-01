@@ -28,6 +28,11 @@ export class JobRouter {
     // Route for toggling publish status of a job posting
     this.router.patch('/:id/publish', this.jobController.toggleJobPublishStatus);
 
+    // Route for getting all job based on geolocation
+    this.router.get('/geolocation', this.jobController.getJobsByGeolocation);
+
+    this.router.get('/locations', this.jobController.getLocations);
+
     // Route for getting all job postings
     this.router.get('/', this.jobController.getJobPostings);
 

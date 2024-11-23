@@ -1,6 +1,7 @@
 'use client';
 import { fetchJobsByFilter, fetchJobsByGeolocation } from '@/lib/job';
 import { IFilters, IJob } from '@/types/job';
+import { result } from 'cypress/types/lodash';
 import { useState, useEffect } from 'react';
 
 const JobsDashboard = () => {
@@ -17,8 +18,9 @@ const JobsDashboard = () => {
   useEffect(() => {
     const getLocations = async () => {
       try {
-        const locationsData = await fetchJobsByGeolocation(0, 0); // Replace 0, 0 with actual latitude and longitude values
-        setLocations(locationsData);
+        const response = await fetch('http://localhost:8000/api/jobs/locations');
+        const data = await response.json();
+        setLocations(data.map((loc: any) => loc.location));
       } catch (error) {
         console.error('Error fetching locations', error);
       }
@@ -31,12 +33,9 @@ const JobsDashboard = () => {
     const fetchJobs = async () => {
       setLoading(true);
       try {
-        const { result: jobsData, ok } = await fetchJobsByFilter(filters);
-        if (ok) {
-          setJobs(jobsData);
-        } else {
-          console.error('Error fetching jobs with filters');
-        }
+        const result = await fetchJobsByFilter(filters);
+        
+        setJobs(result.data);
       } catch (error) {
         console.error('Error fetching jobs with filters', error);
       }
@@ -59,6 +58,41 @@ const JobsDashboard = () => {
       [name]: type === 'checkbox' ? checked : value,
     }));
   };
+
+  const handleApplyClick = async (jobId: number) => {
+    
+    const response = await fetch(`http://localhost:8000/api/jobs/${jobId}/apply`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userId: '13' }), // Assuming '10' is the user ID, replace with actual user ID logic
+    }).then((res) => {
+      if (!res.ok) {
+        // check if there was JSON
+        const contentType = res.headers.get('Content-Type')
+        if (contentType && contentType.includes('application/json')) {
+          // return a rejected Promise that includes the JSON
+          return res.json().then((json) => Promise.reject(json))
+        }
+        // no JSON, just throw an error
+        throw new Error('Something went horribly wrong 💩')
+      }
+
+      return res.json();
+    })
+    .then((data) => {
+      alert('Application submitted successfully!');
+    })
+    .catch((error) => {
+      if(error.message=="Postingan pekerjaan memerlukan tes.") {
+          window.location.href = `/preselection-test/${jobId}`;
+      } else {
+          console.error('Failed to submit test:', error);
+          alert(error.error || error.message);
+      }
+    });  
+};
 
   return (
     <div className="container mx-auto p-6">
@@ -128,7 +162,7 @@ const JobsDashboard = () => {
                 <strong>Remote:</strong> {job.remoteOption ? 'Yes' : 'No'}
               </p>
               <div className="flex justify-between mt-4">
-                <button className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none">
+                <button onClick={() => handleApplyClick(job.id)} className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none">
                   Apply
                 </button>
                 <button className="bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 focus:outline-none">
