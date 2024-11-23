@@ -1,73 +1,3 @@
-// import prisma from '@/prisma';
-// import { InterviewSchedule, InterviewStatus } from '@prisma/client'; // Import your types
-
-// interface CreateScheduleInput {
-//   application_id: number;
-//   date_time: Date;
-//   location: string;
-//   status: InterviewStatus; // Use the enum type directly
-// }
-
-// export const createSchedule = async (input: CreateScheduleInput): Promise<InterviewSchedule> => {
-//   const { application_id, date_time, location, status } = input;
-
-//   const schedule = await prisma.interviewSchedule.create({
-//     data: {
-//       application_id,
-//       date_time,
-//       location,
-//       status,
-//     },
-//   });
-
-//   // Here you can implement the email notification logic
-//   await sendEmailNotification(schedule.application_id);
-
-//   return schedule;
-// };
-
-// export const getSchedules = async (): Promise<InterviewSchedule[]> => {
-//   return await prisma.interviewSchedule.findMany({
-//     include: {
-//       application: {
-//         include: {
-//           user: true, // Include user details if needed
-//         },
-//       },
-//     },
-//   });
-// };
-
-// export const updateSchedule = async (
-//   id: number,
-//   input: Partial<Omit<CreateScheduleInput, 'application_id'>> // Exclude application_id from the partial input
-// ): Promise<InterviewSchedule> => {
-//   return await prisma.interviewSchedule.update({
-//     where: { id },
-//     data: {
-//       // Ensure you're only sending valid fields
-//       ...(input.date_time && { date_time: input.date_time }),
-//       ...(input.location && { location: input.location }),
-//       ...(input.status && { status: input.status as InterviewStatus }), // Cast to InterviewStatus
-//     },
-//   });
-// };
-
-// export const deleteSchedule = async (id: number): Promise<void> => {
-//   await prisma.interviewSchedule.delete({ where: { id } });
-// };
-
-// // Email Notification function (implement this function based on your email service)
-// const sendEmailNotification = async (applicationId: number) => {
-//   const application = await prisma.application.findUnique({
-//     where: { id: applicationId },
-//     include: { user: true }, // Include user details
-//   });
-
-//   if (application && application.user) {
-//     // Use nodemailer or any email service to send the notification
-//   }
-// };
 import prisma from '@/prisma';
 import { InterviewSchedule, InterviewStatus } from '@prisma/client';
 
@@ -88,7 +18,7 @@ export const createSchedule = async (input: CreateScheduleInput): Promise<Interv
       applicant_id: applicant_id,
       date_time: new Date(date_time),
       location: location,
-      status: status ?? 'scheduled',
+      status: status ?? 'SCHEDULED',
     },
   });
 
@@ -130,10 +60,16 @@ export const updateSchedule = async (
   id: number,
   input: Partial<Omit<CreateScheduleInput, 'application_id'>>
 ): Promise<InterviewSchedule> => {
+  if (input.date_time) {
+    const newDate = input.date_time.toString().split('T')[0];
+    const newTime = input.date_time.toString().split('T')[1];
+
+    input.date_time = new Date(`${newDate}T${newTime}:00.000Z`);    
+  }
   return await prisma.interviewSchedule.update({
     where: { id },
     data: {
-      ...(input.date_time && { date_time: new Date(input.date_time) }),
+      ...(input.date_time && { date_time: input.date_time }),
       ...(input.location && { location: input.location }),
       ...(input.status && { status: input.status as InterviewStatus }), // Cast to InterviewStatus
     },

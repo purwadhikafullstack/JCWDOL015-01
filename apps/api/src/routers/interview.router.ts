@@ -1,39 +1,34 @@
-import express, { Request, Response, NextFunction } from 'express';
+import { Router, Request, Response } from 'express';
 import { InterviewController } from '@/controllers/interview.controller';
 
-const router = express.Router();
-const interviewController = new InterviewController();
+export class InterviewRouter {
+  private router: Router;
+  private interviewController: InterviewController;
 
-// Define routes and link to controller methods
+  constructor() {
+    this.router = Router();
+    this.interviewController = new InterviewController();
+    this.routes();
+  }
 
-// Middleware to handle async errors in controller
-const asyncHandler = (fn: Function) => (req: Request, res: Response, next: NextFunction) =>
-  Promise.resolve(fn(req, res, next)).catch(next);
+  private routes(): void {
+    // Create interview schedule (POST)
+    this.router.post('/', this.interviewController.createSchedule);
 
-// Create interview schedule (POST)
-router.post('/', asyncHandler(async (req: Request, res: Response) => {
-  await interviewController.createSchedule(req, res);
-}));
+    // Get interview schedules (GET)
+    this.router.get('/', this.interviewController.getSchedules);
 
-// Get interview schedules (GET)
-router.get('/', asyncHandler(async (req: Request, res: Response) => {
-  await interviewController.getSchedules(req, res);
-}));
+    // Get interview schedules (GET)
+    this.router.get('/:id', this.interviewController.getSchedulesById);
 
-// Get interview schedules (GET)
-router.get('/:id', asyncHandler(async (req: Request, res: Response) => {
-  await interviewController.getSchedulesById(req, res);
-}));
+    // Update interview schedule (PUT)
+    this.router.put('/:id', this.interviewController.updateSchedule);
 
-// Update interview schedule (PUT)
-router.put('/:id', asyncHandler(async (req: Request, res: Response) => {
-  await interviewController.updateSchedule(req, res);
-}));
+    // Delete interview schedule (DELETE)
+    this.router.delete('/:id', this.interviewController.deleteSchedule);
+  }
 
-// Delete interview schedule (DELETE)
-router.delete('/:id', asyncHandler(async (req: Request, res: Response) => {
-  await interviewController.deleteSchedule(req, res);
-}));
-
-export default router;
-
+  public getRouter(): Router {
+    return this.router;
+  }
+}
