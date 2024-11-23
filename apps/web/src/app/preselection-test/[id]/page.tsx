@@ -31,10 +31,14 @@ const TestTakingPage: React.FC = () => {
   const [answers, setAnswers] = useState<{ [key: string]: string }>({});
   const [submitted, setSubmitted] = useState(false);
 
-  const [job, setJob] = useState<JobWithApplicants | null>(null);
-  const [questions, setQuestions] = useState<Question[]>();
+  const [user, setUser] = useState(JSON.parse(localStorage.getItem('user') || '{}'));
 
   useEffect(() => {
+    if(user.isAdmin) {
+      alert('Admin tidak dapat mengikuti tes');
+      window.location.href = '/jobs';
+    }
+
     const fetchJobDetail = async () => {
       if (!id) return;
       try {
@@ -44,7 +48,7 @@ const TestTakingPage: React.FC = () => {
           throw new Error(`Network response was not ok: ${errorMessage}`);
         }
         const data = await response.json();
-        setJob(data);
+        // setJob(data);
 
         // Fetch job's tests
         const testResponse = await fetch(`http://localhost:8000/api/jobs/${id}/test`);
@@ -53,7 +57,7 @@ const TestTakingPage: React.FC = () => {
           throw new Error(`Network response was not ok: ${errorMessage}`);
         }
         const testData = await testResponse.json();
-        setQuestions(testData.questions);
+        // setQuestions(testData.questions);
         setTest(testData);
         
       } catch (error) {
@@ -72,10 +76,14 @@ const TestTakingPage: React.FC = () => {
   };
 
   const handleSubmit = async () => {
+    // get user from local storage
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const token = localStorage.getItem('token');
+    
     const response = await fetch(`http://localhost:8000/api/tests/${test?.id}/submit`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId: "13", answers }),
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+      body: JSON.stringify({ userId: user.id, answers }),
     }).then((res) => {
       if (!res.ok) {
         // check if there was JSON

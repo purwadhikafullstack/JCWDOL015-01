@@ -62,11 +62,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         console.log(result.user);
         return;
       }
-
       if (ok && result.token) {
+        localStorage.setItem('token', result.token);
+        const { password, ...userWithoutPassword } = result.user;
+        userWithoutPassword.isAdmin = false;
+        localStorage.setItem('user', JSON.stringify(userWithoutPassword));
         setToken(result.token);
         toast.success('Login successful');
-        dispatch(setProfile(result.data));
+        dispatch(setProfile(result.user));
         action.resetForm();
         router.back();
         return;
@@ -89,7 +92,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const onLogout = async () => {
-    setToken('');
+    setToken(null);
+    setTokenAdmin(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     dispatch(clearProfile());
     toast.success('Logout successful');
     router.refresh();
@@ -102,7 +108,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       const { result, ok } = await loginAdmin(data);
       if (ok && result.data.token) {
-        localStorage.setItem('tokenAdmin', result.data.token);
+        localStorage.setItem('token', result.data.token);
         const { password, ...adminWithoutPassword } = result.data.Admin;
         adminWithoutPassword.isAdmin = true;
         localStorage.setItem('user', JSON.stringify(adminWithoutPassword));

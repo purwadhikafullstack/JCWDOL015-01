@@ -8,6 +8,8 @@ export const Header = () => {
   const { token, tokenAdmin, onLogout } = useAuth();
   const pathname = usePathname();
 
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+
   let isAdmin = pathname.startsWith('/admin');
   if (tokenAdmin) {
     isAdmin = true;
@@ -92,14 +94,35 @@ export const Header = () => {
           </div>
         ) : (
           <div className="flex flex-row justify-center gap-2">
-            <Link
-              href="/admin"
-              className="border-white hover:border-y-8 h-20 flex items-center duration-100"
-            >
-              For Admin
-            </Link>
-            <div className="flex items-center">|</div>
-            {tokenAdmin ? (
+            {token && (
+              <div className='flex flex-row justify-center gap-2'>
+                <div>{user.name}</div>
+                <div className="flex items-center">|</div>
+                <button onClick={onLogout} className="flex items-center">
+                  Logout
+                </button>
+              </div>
+            )}
+
+            {!tokenAdmin && !token && (
+              <div>
+                <Link
+                  href="/admin"
+                  className="border-white hover:border-y-8 h-20 flex items-center duration-100"
+                >
+                  For Admin
+                </Link>
+                <div className="flex flex-row justify-center gap-2">
+                  <Link href="/user/login" className="flex items-center">
+                    Login
+                  </Link>
+                  <Link href="/user/register" className="flex items-center">
+                    Sign Up
+                  </Link>
+                </div>
+              </div>
+            )}
+            {tokenAdmin && (
               <div className="flex flex-row justify-center gap-2">
                 <Link href="/user/dashboard" className="flex items-center">
                   Dashboard
@@ -107,15 +130,6 @@ export const Header = () => {
                 <button onClick={onLogout} className="flex items-center">
                   Logout
                 </button>
-              </div>
-            ) : (
-              <div className="flex flex-row justify-center gap-2">
-                <Link href="/user/login" className="flex items-center">
-                  Login
-                </Link>
-                <Link href="/user/register" className="flex items-center">
-                  Sign Up
-                </Link>
               </div>
             )}
           </div>

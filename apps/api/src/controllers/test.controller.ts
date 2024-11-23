@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import * as testService from '@/services/test.service';
 import { checkApplicant, createApplicant } from "@/services/applicant.service";
+import jwt from 'jsonwebtoken';
 
 export class TestController {
     public async createPreSelectionTest(req: Request, res: Response): Promise<void> {
@@ -49,23 +50,42 @@ export class TestController {
             return
         }
             
+        // get user from token
+        const token = req.headers.authorization;
+        if (!token) {
+            res.status(401).json({ message: 'Unauthorized' });
+            return
+        }
+
+        // Verify token
+        const tokenData = token.split(' ')[1];
+        const decodedToken = jwt.verify(tokenData, process.env.JWT!);
+
+        if (!decodedToken) {
+            res.status(401).json({ message: 'Unauthorized' });
+            return
+        }
+
+        const userdata = JSON.parse(JSON.stringify(decodedToken) as string);
 
         // check if user already applied
         if (job?.id) {
-            const existingApplicants = await checkApplicant(req.body.userId, req.params.testId);
+            const existingApplicants = await checkApplicant(userdata.id, req.params.testId);
             if (existingApplicants !== null) {
                 res.status(400).json({ message: 'User already applied for this job' });
                 return
             }
         }
 
-        try {
-            const applicant = await createApplicant(req.body.userId, job.id.toString());
+        console.log(job);
+
+        // try {
+            const applicant = await createApplicant(userdata.id, job.job_id.toString());
             const result = await testService.submitPreSelectionTest(req.body, req.params.testId, applicant.id);
             res.status(201).json(result);
-        } catch (error) {
-            res.status(500).json({ message: 'Error submitting test', error });
-        }
+        // } catch (error) {
+        //     res.status(500).json({ message: 'Error submitting test', error });
+        // }
     
     }
 

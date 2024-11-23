@@ -1,5 +1,5 @@
 export interface IFilters {
-  title: string;
+  title?: string;
   location: string;
   remoteOption: boolean;
   tags: string;

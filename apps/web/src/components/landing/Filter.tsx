@@ -1,12 +1,12 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { fetchLocations, fetchJobsByFilter } from '@/lib/job'; // Import the functions
-import { JobFilters } from '@/types/job';
+import { IFilters } from '@/types/job';
 
 export default function Filter({
   onFilterChange,
 }: {
-  onFilterChange: (filters: JobFilters) => void;
+  onFilterChange: (filters: IFilters) => void;
 }) {
   const [locations, setLocations] = useState<string[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<string>('');
@@ -18,7 +18,7 @@ export default function Filter({
     const loadLocations = async () => {
       try {
         const fetchedLocations = await fetchLocations(); // Use the fetchLocations function
-        setLocations(fetchedLocations);
+        setLocations(fetchedLocations.map((loc: any) => loc.location));
       } catch (error) {
         console.error('Error loading locations:', error);
       }
@@ -45,7 +45,7 @@ export default function Filter({
   };
 
   const handleSubmit = async () => {
-    const filters: JobFilters = {
+    const filters: IFilters = {
       location: selectedLocation,
       remoteOption,
       tags: selectedTags,
