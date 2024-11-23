@@ -33,6 +33,9 @@ export class TestRouter {
 
         // Route for updating a pre-selection test (admin only)
         this.router.put('/:testId', checkAdmin, this.testController.updatePreSelectionTest);
+
+        // Route for deleting a pre-selection test (admin only)
+        this.router.delete('/:testId', checkAdmin, this.testController.deleteTest);
     }
 
     public getRouter(): Router { 

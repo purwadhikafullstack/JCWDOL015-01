@@ -12,6 +12,7 @@ import { PORT } from './config';
 import { UserRouter } from './routers/user.router';
 import { AdminRouter } from './routers/admin.router';
 import { JobRouter } from './routers/job.router';
+import { TestRouter } from './routers/test.router';
 import { CompanyRouter } from './routers/company.router';
 import { ApplicationRouter } from './routers/application.router';
 import { AnalyticsRouter } from './routers/analytics.router';
@@ -62,6 +63,7 @@ export default class App {
     const companyRouter = new CompanyRouter();
     const applicationRouter = new ApplicationRouter();
     const analyticsRouter = new AnalyticsRouter();
+    const testRouter = new TestRouter();
 
     this.app.get('/api', (req: Request, res: Response) => {
       res.send(`Hello, Purwadhika Student API!`);
@@ -70,9 +72,11 @@ export default class App {
     this.app.use('/api/user', userRouter.getRouter());
     this.app.use('/api/admin', adminRouter.getRouter());
     this.app.use('/api/jobs', jobRouter.getRouter());
+    this.app.use('/api/tests', testRouter.getRouter());
     this.app.use('/api/company', companyRouter.getRouter());
     this.app.use('/api/analytics', analyticsRouter.getRouter());
     this.app.use('/api/application', applicationRouter.getRouter());
+
   }
 
   public start(): void {

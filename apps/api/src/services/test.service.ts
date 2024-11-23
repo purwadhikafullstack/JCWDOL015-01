@@ -256,7 +256,6 @@ export const createPreSelectionTest = async (data: any) => {
 
 // Service to update an existing pre-selection test by testId
 export const updatePreSelectionTest = async (testId: number, updateData: any) => {
-    console.log(testId);
     return await prisma.test.update({
         where: { id: testId },
         data: {
@@ -382,5 +381,18 @@ export const getJobByTestId = async (testId: number) => {
     return await prisma.test.findUnique({
         where: { id: testId },
         include: { job: true },
+    });
+};
+
+export const getQuestionsByTestId = async (testId: number) => {
+    return await prisma.test.findUnique({
+        where: { id: testId },
+        include: { questions: true },
+    });
+};
+
+export const deleteTest = async (testId: number) => {
+    return await prisma.test.delete({
+        where: { id: testId },
     });
 };

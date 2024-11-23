@@ -188,7 +188,7 @@ model Question {
   test_id      Int
   question_text String @db.VarChar(500)
   choices      Choice[]
-  test         Test     @relation(fields: [test_id], references: [id])
+  test         Test     @relation(fields: [test_id], references: [id], onDelete: Cascade)
 
    @@map("questions")
 }
@@ -198,7 +198,7 @@ model Choice {
   question_id   Int 
   choice_text   String  
   is_correct    Boolean  
-  question     Question @relation(fields: [question_id], references: [id])
+  question     Question @relation(fields: [question_id], references: [id], onDelete: Cascade)
 
    @@map("choices") 
 }
