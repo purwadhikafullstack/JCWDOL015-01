@@ -14,7 +14,6 @@ export const Header = () => {
   }
 
   const isActive = (path: string) => pathname.startsWith(path);
-  console.log();
 
   return (
     <div className="flex flex-row p-2 h-20 w-full items-center justify-between gap-5 bg-blue-600 text-white font-bold">

@@ -84,7 +84,7 @@ model Subscription {
 
 model Job {
   id              Int       @id @default(autoincrement())
-  adminId        Int   
+  admin_id        Int   
   title           String
   description     String
   banner          String? 
@@ -102,7 +102,7 @@ model Job {
   applicant       Applicant[]
   test            Test[]
   application     Application[]
-  admin        Admin         @relation(fields: [adminId], references: [id])
+  admin        Admin         @relation(fields: [admin_id], references: [id])
 }
 
 model Application {

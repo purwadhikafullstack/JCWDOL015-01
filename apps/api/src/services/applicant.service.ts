@@ -183,7 +183,7 @@ export const getAllApplicants = async (query: {
     where: {
       job_posting_id: query.job_posting_id ? Number(query.job_posting_id) : undefined,
       status: {
-        in: ['pending','in_process','interview']
+        in: ['PENDING', 'ACCEPTED', 'REJECTED'],
       },
     },
   });
@@ -235,7 +235,7 @@ export const acceptApplicant = async (applicantId: number, jobId: number) => {
   if (applicant) {
     return await prisma.applicant.update({
       where: { id: applicant.id },
-      data: { status: 'accepted' }, // Update the status to accepted
+      data: { status: 'ACCEPTED' }, // Update the status to accepted
     });
   }
 
@@ -254,7 +254,7 @@ export const rejectApplicant = async (applicantId: number, jobId: number) => {
   if (applicant) {
     return await prisma.applicant.update({
       where: { id: applicant.id },
-      data: { status: 'rejected' }, // Update the status to rejected
+      data: { status: 'REJECTED' }, // Update the status to rejected
     });
   }
 
@@ -274,7 +274,7 @@ export const inProcessApplicant = async (applicantId: number, jobId: number) => 
   if (applicant) {
     return await prisma.applicant.update({
       where: { id: applicant.id },
-      data: { status: 'in_process' }, // Update the status to in process
+      data: { status: 'IN_PROCESS' }, // Update the status to in process
     });
   }
 
@@ -293,7 +293,7 @@ export const interviewApplicant = async (applicantId: number, jobId: number) => 
   if (applicant) {
     return await prisma.applicant.update({
       where: { id: applicant.id },
-      data: { status: 'interview' }, // Update the status to interview
+      data: { status: 'INTERVIEW' }, // Update the status to interview
     });
   }
 

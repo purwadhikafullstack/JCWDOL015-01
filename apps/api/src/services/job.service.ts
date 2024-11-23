@@ -28,15 +28,9 @@ import { PrismaClient } from '@prisma/client';
         banner?: string; // Add banner field for URL storage
     }) => {
         try {
+            
             return await prisma.job.create({
-                data: {
-                    ...data,
-                    admin: {
-                        connect: {
-                            id: data.admin_id,
-                        },
-                    },
-                },
+                data
             });
         } catch (error) {
             console.error('Error creating job posting:', error);

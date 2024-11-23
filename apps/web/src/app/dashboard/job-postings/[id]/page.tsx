@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from 'react';
+import React, { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/DashboardLayout';
 import { formatCurrency, formatDate } from '@/utils/utils';
@@ -34,9 +34,8 @@ interface Job {
   updated_at: string;
   applicant: Applicant[];
 }
-
-const JobPostingDetail = ({ params }: { params: { id: string } }) => {
-    const id = params.id; 
+const JobPostingDetail = ({ params }: { params: Promise<{ id: string }> }) => {
+    const { id } = use(params);
     const [job, setJob] = useState<Job | null>(null);
 
     useEffect(() => {
