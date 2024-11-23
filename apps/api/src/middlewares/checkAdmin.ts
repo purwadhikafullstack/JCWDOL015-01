@@ -1,11 +1,39 @@
+import prisma from '@/prisma';
 import { Request, Response, NextFunction } from 'express';
-
+import jwt from 'jsonwebtoken';
 export const checkAdmin = (req: Request, res: Response, next: NextFunction) => {
-    // Assuming user role is stored in req.user.role
-    if (req.user?.role !== 'admin') {
-        return res.status(403).json({ message: 'Access denied: Admins only.' });
+    // Very from headers authorization token
+    const token = req.headers.authorization;
+
+    if (!token) {
+        return res.status(401).json({ message: 'Unauthorized' });
     }
-    next();
+
+    // Verify token
+    const tokenData = token.split(' ')[1];
+    const decodedToken = jwt.verify(tokenData, process.env.JWT!);
+
+    if (!decodedToken) {
+        return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    const decodedData = JSON.parse(JSON.stringify(decodedToken) as string);
+
+    // Check if user is admin
+    prisma.admin.findUnique({
+        where: {
+            id: Number(decodedData.id)
+        }
+    }).then((user) => {
+        if (!user) {
+            return res.status(403).json({ message: 'Access denied: Admins only.' });
+        }    
+        req.user = user;  
+        next();
+    }).catch((error) => {
+        console.error('Error checking admin:', error);
+        return res.status(500).json({ message: 'Internal Server Error' });
+    });
 };
 
 
