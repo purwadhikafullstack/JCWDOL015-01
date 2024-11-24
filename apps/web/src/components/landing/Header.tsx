@@ -1,14 +1,12 @@
 'use client';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useAuth } from '../authContext/AuthContext';
+import { useAuth } from '../authContext/Provider';
 import { usePathname } from 'next/navigation';
 
 export const Header = () => {
-  const { token, onLogout } = useAuth();
+  const { token, onLogout, adminToken, onAdminLogout } = useAuth();
   const pathname = usePathname();
-
-  const isAdmin = pathname.startsWith('/admin');
 
   const isActive = (path: string) => pathname.startsWith(path);
 
@@ -66,45 +64,53 @@ export const Header = () => {
         )}
       </div>
       <div className="flex flex-row justify-center gap-2">
-        {isAdmin ? (
-          <div className="flex flex-row justify-center gap-2">
-            <span className="border-cyan-500 border-y-8 h-20 flex items-center duration-100">
+        {adminToken ? (
+          <>
+            <Link
+              href="/admin/dashboard"
+              className="border-white hover:border-y-8 h-20 flex items-center duration-100"
+            >
               For Admin
-            </span>
+            </Link>
+
             <div className="flex items-center">|</div>
             <Link href="/admin/dashboard" className="flex items-center">
               Dashboard
             </Link>
-          </div>
+            <button onClick={onAdminLogout} className="flex items-center">
+              Logout
+            </button>
+          </>
+        ) : token ? (
+          <>
+            <Link href="/user/dashboard" className="flex items-center">
+              Dashboard
+            </Link>
+            <button onClick={onLogout} className="flex items-center">
+              Logout
+            </button>
+          </>
         ) : (
-          <div className="flex flex-row justify-center gap-2">
+          <>
             <Link
               href="/admin"
               className="border-white hover:border-y-8 h-20 flex items-center duration-100"
             >
               For Admin
             </Link>
-            <div className="flex items-center">|</div>
-            {token ? (
-              <div className="flex flex-row justify-center gap-2">
-                <Link href="/user/dashboard" className="flex items-center">
-                  Dashboard
-                </Link>
-                <button onClick={onLogout} className="flex items-center">
-                  Logout
-                </button>
-              </div>
-            ) : (
-              <div className="flex flex-row justify-center gap-2">
+
+            {isActive('/admin') ? null : (
+              <>
+                <div className="flex items-center">|</div>
                 <Link href="/user/login" className="flex items-center">
                   Login
                 </Link>
                 <Link href="/user/register" className="flex items-center">
                   Sign Up
                 </Link>
-              </div>
+              </>
             )}
-          </div>
+          </>
         )}
       </div>
     </div>

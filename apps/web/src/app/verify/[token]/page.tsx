@@ -25,7 +25,7 @@ export default function Verify() {
 
   useEffect(() => {
     onVerify();
-  }, []);
+  });
   return (
     <Wrapper>
       <div className="mt-10 font-extrabold text-5xl">

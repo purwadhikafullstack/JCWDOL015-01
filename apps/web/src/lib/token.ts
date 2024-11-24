@@ -18,3 +18,20 @@ export async function fetchToken() {
 export async function deleteToken() {
   cookies().delete('token');
 }
+
+export async function createAdminToken(token: string) {
+  const oneDay = 24 * 60 * 60 * 1000;
+  const expires = new Date(Date.now() + oneDay);
+  cookies().set('adminToken', token, {
+    expires,
+  });
+}
+
+export async function fetchAdminToken() {
+  return cookies().get('adminToken')?.value;
+
+}
+
+export async function deleteAdminToken() {
+  cookies().delete('adminToken');
+}

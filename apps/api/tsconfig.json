@@ -15,6 +15,6 @@
     }
   },
   // "include": ["src/**/*"],
-  "include": ["**/*.ts"],
+  "include": ["**/*.ts", "../auth.ts"],
   "exclude": ["node_modules"]
 }

@@ -1,12 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { signIn } from "next-auth/react";
+import { oAuthGoogle } from "@/lib/oAuth";
 
 export function GoogleSignInButton() {
-  const handleClick = () => {
-    signIn("google");
-  };
+  const handleClick = async() =>{
+    await oAuthGoogle();
+  }
 
   return (
     <button

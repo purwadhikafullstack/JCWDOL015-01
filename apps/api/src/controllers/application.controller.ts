@@ -1,15 +1,13 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/prisma';
 import { Request, Response } from 'express';
-
-const prisma = new PrismaClient();
 
 export class ApplicationController {
   // Apply for a job
   async applyJob(req: Request, res: Response) {
     try {
-      const { jobId, resumeUrl, expectedSalary } = req.body;
+      const { jobId, resume, expectedSalary } = req.body;
 
-      if (!resumeUrl || !expectedSalary || !jobId) {
+      if (!resume || !expectedSalary || !jobId) {
         return res
           .status(400)
           .json({ ok: false, message: 'Missing required fields.' });
@@ -19,11 +17,12 @@ export class ApplicationController {
       const job = await prisma.job.findUnique({
         where: { id: jobId },
         include: {
-          admin: {  // Get the admin (company) information
+          admin: {
+            // Get the admin (company) information
             select: {
               companyName: true,
               companyDescription: true,
-              companyLogoUrl: true,
+              companyLogo: true,
             },
           },
         },
@@ -33,13 +32,19 @@ export class ApplicationController {
         return res.status(404).json({ ok: false, message: 'Job not found.' });
       }
 
+      // Ensure userId is a number
+      const userId = req?.user?.id;
+      if (typeof userId !== 'number') {
+        return res.status(400).json({ ok: false, message: 'Invalid user ID.' });
+      }
+
       // Create the application record
       const application = await prisma.application.create({
         data: {
           jobId,
-          userId: req?.user?.id, // Assuming user is authenticated
+          userId,
           expectedSalary: parseFloat(expectedSalary),
-          resumeUrl,
+          resume,
         },
       });
 
@@ -54,7 +59,7 @@ export class ApplicationController {
           jobSalary: job.salary,
           jobCompanyName: job.admin.companyName,
           jobCompanyDescription: job.admin.companyDescription,
-          jobCompanyLogoUrl: job.admin.companyLogoUrl,
+          jobCompanyLogoUrl: job.admin.companyLogo,
         },
       });
     } catch (error) {
@@ -63,7 +68,7 @@ export class ApplicationController {
         .status(500)
         .json({ ok: false, message: 'Failed to apply for job' });
     }
-  },
+  }
 
   // Fetch job details (optional)
   async getJobDetail(req: Request, res: Response) {
@@ -77,7 +82,7 @@ export class ApplicationController {
             select: {
               companyName: true,
               companyDescription: true,
-              companyLogoUrl: true,
+              companyLogo: true,
             },
           },
         },
@@ -99,13 +104,15 @@ export class ApplicationController {
           companyInfo: {
             companyName: job.admin.companyName,
             companyDescription: job.admin.companyDescription,
-            companyLogoUrl: job.admin.companyLogoUrl,
+            companyLogoUrl: job.admin.companyLogo,
           },
         },
       });
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ ok: false, message: 'Error fetching job details' });
+      return res
+        .status(500)
+        .json({ ok: false, message: 'Error fetching job details' });
     }
-  },
-};
+  }
+}

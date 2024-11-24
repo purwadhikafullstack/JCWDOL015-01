@@ -64,14 +64,14 @@ export const sendMailAdmin = async (adminEmail: string) => {
   }
 };
 
-export const sendMailBlockedUser = async (userEmail: string) => {
+export const sendMailBlockedAccount = async (userEmail: string) => {
   try {
     const payload = { email: userEmail };
     const token = sign(payload, process.env.JWT!, { expiresIn: '10m' });
 
     const templatePath = path.join(
       __dirname,
-      '../templates/blockedUser.hbs',
+      '../templates/blockedAccount.hbs',
     );
     const templateSource = fs.readFileSync(templatePath, 'utf-8');
     const compiledTemplate = Handlebars.compile(templateSource);
@@ -84,6 +84,33 @@ export const sendMailBlockedUser = async (userEmail: string) => {
       to: userEmail,
       subject: 'Account blocked',
       text: 'Your account has been blocked',
+      html: html,
+    });
+  } catch (error) {
+    throw new Error('Failed to send email');
+  }
+}
+
+export const sendMailChangeEmail = async (userEmail: string) => {
+  try {
+    const payload = { email: userEmail };
+    const token = sign(payload, process.env.JWT!, { expiresIn: '10m' });
+
+    const templatePath = path.join(
+      __dirname,
+      '../templates/changeEmail.hbs',
+    );
+    const templateSource = fs.readFileSync(templatePath, 'utf-8');
+    const compiledTemplate = Handlebars.compile(templateSource);
+    const html = compiledTemplate({
+      link: `http://localhost:3000/user/verify/${token}`,
+    });
+
+    await transporter.sendMail({
+      from: process.env.EMAIL,
+      to: userEmail,
+      subject: 'Changed Email',
+      html: html,
     });
   } catch (error) {
     throw new Error('Failed to send email');
