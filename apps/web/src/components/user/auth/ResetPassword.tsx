@@ -1,6 +1,7 @@
+'use client';
 import * as yup from 'yup';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
-import { useAuth } from '@/components/authContext/AuthContext';
+import { useAuth } from '@/components/authContext/Provider';
 
 const ResetPasswordSchema = yup.object().shape({
   oldPassword: yup.string().required('Password is required'),
@@ -29,7 +30,7 @@ export default function ResetPasswordForm() {
                 <div className="mt-2">
                   <Field
                     name="oldPassword"
-                    type="password "
+                    type="password"
                     className="block w-full rounded-md border-0 p-1.5 text-black shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                   />
                   <ErrorMessage

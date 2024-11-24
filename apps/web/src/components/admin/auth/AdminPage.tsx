@@ -12,7 +12,7 @@ export default function AdminPage() {
         </div>
         <div className='flex flex-row gap-10 font-bold text-xl'>
           <Link href="/admin/login" className='p-4 border-black border-2 rounded-full hover:bg-amber-400 duration-300'>Login</Link>
-          <Link href="/admin/signup" className='p-4 border-black border-2 rounded-full hover:bg-amber-400 duration-300'>Signup</Link>
+          <Link href="/admin/register" className='p-4 border-black border-2 rounded-full hover:bg-amber-400 duration-300'>Signup</Link>
         </div>
       </div>
     </div>

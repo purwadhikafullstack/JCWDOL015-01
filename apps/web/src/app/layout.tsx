@@ -5,8 +5,9 @@ import { Header } from '@/components/landing/Header';
 import { Footer } from '@/components/landing/Footer';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { AuthProvider } from '@/components/authContext/AuthContext';
+import { AuthProvider } from '@/components/authContext/Provider';
 import StoreProvider from '@/components/storeProvider';
+
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
@@ -21,20 +22,28 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <StoreProvider>
-          <AuthProvider>
-            <Header />
-            {children}
+      <body className={`${inter.className} h-full`}>
+        <div className="min-h-screen flex flex-col">
+          <StoreProvider>
+            <AuthProvider>
+              {/* Header */}
+              <Header />
 
-            <Footer />
-            <ToastContainer
-              position="bottom-right"
-              autoClose={5000}
-              closeOnClick
-            />
-          </AuthProvider>
-        </StoreProvider>
+              {/* Main Content */}
+              <main className="flex-1">{children}</main>
+
+              {/* Footer */}
+              <Footer />
+
+              {/* Toast Notifications */}
+              <ToastContainer
+                position="bottom-right"
+                autoClose={5000}
+                closeOnClick
+              />
+            </AuthProvider>
+          </StoreProvider>
+        </div>
       </body>
     </html>
   );

@@ -1,6 +1,8 @@
 'use client';
 
-import { useAuth } from '@/components/authContext/AuthContext';
+
+
+import { useAuth } from '@/components/authContext/Provider';
 import { ErrorMessage, Field, Form, Formik } from 'formik';
 import * as yup from 'yup';
 
@@ -13,20 +15,20 @@ const LoginSchema = yup.object().shape({
 });
 
 export default function LoginAdminForm() {
-  const { onLogin } = useAuth();
+  const { onAdminLogin } = useAuth();
 
   return (
     <Formik
       initialValues={{ email: '', password: '' }}
       validationSchema={LoginSchema}
       onSubmit={(values, action) => {
-        onLogin(values, action);
+        onAdminLogin(values, action);
       }}
     >
       {() => {
         return (
           <Form>
-            <div className=" min-w-[30vw]">
+            <div className="min-w-[30vw]">
               <div className="mt-10">
                 <label className="block text-sm font-medium leading-6 text-gray-900">
                   Email

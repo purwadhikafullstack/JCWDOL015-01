@@ -1,5 +1,5 @@
 'use client';
-import { useAuth } from '@/components/authContext/AuthContext';
+import { useAuth } from '@/components/authContext/Provider';
 import { ErrorMessage, Field, Form, Formik } from 'formik';
 import * as yup from 'yup';
 

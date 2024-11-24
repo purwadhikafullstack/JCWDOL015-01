@@ -9,7 +9,7 @@ interface User {
     gender?: string;
     education?: string;
     address?: string;
-    profilePictureUrl?: string;
+    profilePicture?: string;
     isVerified: boolean;
     isBlocked: boolean;
     subscriptionType?: string;
@@ -26,7 +26,7 @@ interface User {
       id: number;
       jobId: number;
       status: string; 
-      resumeUrl: string; 
+      resume: string; 
       appliedAt: string; 
       coverLetter?: string;
       expectedSalary?: number;

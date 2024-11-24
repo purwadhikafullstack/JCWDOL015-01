@@ -19,7 +19,7 @@ model User {
   gender              String?
   education           String?
   address             String?
-  profilePictureUrl   String?
+  profilePicture      String?
   isVerified          Boolean           @default(false)
   isBlocked           Boolean           @default(false)
   subscriptionType    SubscriptionType?
@@ -38,7 +38,7 @@ model Admin {
   companyName        String
   phoneNumber        String
   companyDescription String?
-  companyLogoUrl     String?
+  companyLogo        String?
   isBlocked          Boolean        @default(false)
   status             AdminStatus
   jobs               Job[]
@@ -50,7 +50,6 @@ model Developer {
   id               Int               @id @default(autoincrement())
   password         String
   email            String            @unique
-  role             DeveloperRole
   lastLogin        DateTime?
   skillAssessments SkillAssessment[]
   notifications    Notification[]
@@ -99,12 +98,12 @@ model Job {
 }
 
 model Application {
-  id             Int               @id @default(autoincrement())
+  id             Int                @id @default(autoincrement())
   jobId          Int
   userId         Int
   status         ApplicationStatus? @default(PENDING)
-  resumeUrl      String
-  appliedAt      DateTime          @default(now())
+  resume         String
+  appliedAt      DateTime           @default(now())
   coverLetter    String?
   expectedSalary Float?
 
@@ -171,11 +170,6 @@ enum SubscriptionType {
 enum AdminStatus {
   ACTIVE
   INACTIVE
-}
-
-enum DeveloperRole {
-  ADMIN
-  SUPPORT
 }
 
 enum ApplicationStatus {

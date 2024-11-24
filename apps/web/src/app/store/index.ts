@@ -1,5 +1,7 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import { persistReducer, persistStore, Persistor } from "redux-persist";
+import userReducer from "./slices/userSlice";
+import adminReducer from "./slices/adminSlice";
 import createWebStorage from "redux-persist/lib/storage/createWebStorage";
 
 import {
@@ -7,7 +9,6 @@ import {
     PERSIST,
     REGISTER,
 } from "redux-persist";
-import { userSlice } from "./slices/userSlice";
 
 const createNoopStorage = () => {
     return {
@@ -35,7 +36,8 @@ const persistConfig = {
 };
 
 const rootReducer = combineReducers({
-    user: userSlice.reducer,
+    user: userReducer,
+    admin: adminReducer,
 });
 
 const makeConfiguredStore = () =>
