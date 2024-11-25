@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import styles from '@/app/subscriptions/subs.module.css';
 import { getAllSubscriptionCategories, purchaseSubscription, getUserSubscriptions } from '@/services/subsServices';
 import SubscriptionCard from '@/components/Subscriptions/subsCards';
 import UserSubs from '@/components/Subscriptions/userSubs';
@@ -38,18 +39,30 @@ const SubscriptionPage: React.FC = () => {
     };
 
     return (
-        <div className="subscription-page">
+        <div className="p-6 bg-gradient-to-b from-gray-50 to-gray-100 min-h-screen">
+            {/* User Subscription */}
             {userSubscription ? (
-                <UserSubs subscription={userSubscription} />
+                <div className="mb-8 p-6 bg-white rounded-lg shadow-lg">
+                    <UserSubs subscription={userSubscription} />
+                </div>
             ) : (
-                <p>No active subscription. Please choose one below.</p>
+                <p className="text-lg text-gray-700 mb-8 text-center">
+                    No active subscription. Please choose one below.
+                </p>
             )}
-            <div className="subscription-cards">
+
+            {/* Subscription Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {categories.map((category, index) => (
-                    <SubscriptionCard key={index} category={category} onPurchase={handlePurchase} />
+                    <SubscriptionCard
+                        key={index}
+                        category={category}
+                        onPurchase={handlePurchase}
+                    />
                 ))}
             </div>
         </div>
+
     );
 };
 
