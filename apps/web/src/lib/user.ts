@@ -3,6 +3,7 @@ import {
   IChangePassword,
   IChangeProfile,
   ICheckEmail,
+  ILocation,
   ILogin,
   IRegister,
   IReset,
@@ -163,6 +164,21 @@ export const changeProfilePicture = async (
     const res = await axios.post(`${link}/user/change-profile-picture`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data', // Ensure correct content type for file uploads
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return { result: res.data, ok: true };
+  } catch (error) {
+    const err = error as any;
+    return { result: err.response?.data || 'Connection error', ok: false };
+  }
+};
+
+export const saveLocation = async (data: ILocation, token: string) => {
+  try {
+    const res = await axios.post(`${link}/user/save-location`, data, {
+      headers: {
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
     });

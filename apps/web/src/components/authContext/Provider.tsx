@@ -8,6 +8,7 @@ import {
   isVerified,
   loginUser,
   resetPassword,
+  saveLocation,
 } from '@/lib/user';
 import {
   changeCompanyLogo,
@@ -23,6 +24,7 @@ import {
   IChangePassword,
   IChangeProfile,
   ICheckEmail,
+  ILocation,
   ILogin,
   IReset,
 } from '@/types/user';
@@ -45,8 +47,6 @@ import {
   createToken,
   deleteAdminToken,
   deleteToken,
-  fetchAdminToken,
-  fetchToken,
 } from '@/lib/token';
 import {
   clearAdminProfile,
@@ -68,6 +68,7 @@ interface AuthContextType {
     action: FormikHelpers<IChangePassword>,
   ) => void;
   onChangingProfilePicture: (formData: FormData) => void;
+  onSavingLocation: (data: ILocation) => void;
 
   adminToken: string | null;
   onAdminLogin: (data: ILoginAdmin, action: FormikHelpers<ILoginAdmin>) => void;
@@ -248,7 +249,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       if (ok) {
         toast.success('Profile picture updated');
         dispatch(setProfile(result.updatedUser));
-        router.push('/')
+        router.push('/');
+        return;
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const onSavingLocation = async (data: ILocation) => {
+    try {
+      const { result, ok } = await saveLocation(data, token);
+      if (ok) {
+        toast.success('Location saved');
         return;
       }
     } catch (error) {
@@ -389,7 +402,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       if (ok) {
         toast.success('Company Logo updated');
         dispatch(setAdminProfile(result.updatedAdmin));
-        router.push('/admin')
+        router.push('/admin');
         return;
       }
     } catch (error) {
@@ -411,6 +424,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         onChangingEmail,
         onChangingPassword,
         onChangingProfilePicture,
+        onSavingLocation,
+
         adminToken,
         onAdminLogin,
         onAdminLogout,

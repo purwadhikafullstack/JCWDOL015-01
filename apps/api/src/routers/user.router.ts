@@ -25,6 +25,7 @@ export class UserRouter {
     this.router.post('/change-password', verifyToken, this.userController.changePassword);
     this.router.post('/change-email', verifyToken, this.userController.changeEmail);
     this.router.post('/change-profile-picture', verifyToken, uploader("profilePicture", "/profile-picture").single('profilePicture') , this.userController.changeProfilePicture);
+    this.router.post('/save-location', verifyToken, this.userController.saveLocation);
   }
 
   getRouter(): Router {

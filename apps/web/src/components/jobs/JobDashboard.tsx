@@ -1,6 +1,7 @@
 'use client';
 import { fetchJobsByFilter, fetchJobsByGeolocation } from '@/lib/job';
 import { IFilters, IJob } from '@/types/job';
+import Link from 'next/link';
 import { useState, useEffect } from 'react';
 
 const JobsDashboard = () => {
@@ -128,9 +129,9 @@ const JobsDashboard = () => {
                 <strong>Remote:</strong> {job.remoteOption ? 'Yes' : 'No'}
               </p>
               <div className="flex justify-between mt-4">
-                <button className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none">
+                <Link href={'/application'} className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none">
                   Apply
-                </button>
+                </Link>
                 <button className="bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 focus:outline-none">
                   Save
                 </button>

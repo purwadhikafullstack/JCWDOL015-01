@@ -403,4 +403,33 @@ export class UserController {
       });
     }
   }
+
+  async saveLocation(req: Request, res: Response) {
+    try {
+      const { latitude, longitude, currentLocation } = req.body;
+      await prisma.user.update({
+        where: { email: req.user?.email },
+        data: {
+          currentLocation,
+          currentPosition: {
+            create: {
+              latitude,
+              longitude,
+            },
+          },
+        },
+      });
+
+      return res.status(200).send({
+        status: 'success',
+        message: 'Location saved',
+      });
+    } catch (error) {
+      return res.status(400).send({
+        status: 'error',
+        message: 'Location save failed',
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
 }
