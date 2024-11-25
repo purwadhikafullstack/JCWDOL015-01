@@ -12,7 +12,7 @@ export class CompanyRouter {
   }
 
   private initializeRoutes(): void {
-    this.router.get("/", this.companyController.getCompanyAndJobs);
+    this.router.get('/', this.companyController.getCompanies);
   }
 
   getRouter(): Router {

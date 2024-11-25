@@ -36,3 +36,9 @@ export interface IChangeEmail {
   oldEmail: string;
   newEmail: string;
 }
+
+export interface ILocation{
+  latitude: number;
+  longitude: number;
+  currentLocation?: string;
+}

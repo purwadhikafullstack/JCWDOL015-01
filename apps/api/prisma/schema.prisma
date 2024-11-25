@@ -19,6 +19,8 @@ model User {
   gender              String?
   education           String?
   address             String?
+  currentLocation     String?
+  currentPosition     CurrentPosition?
   profilePicture      String?
   isVerified          Boolean           @default(false)
   isBlocked           Boolean           @default(false)
@@ -29,6 +31,14 @@ model User {
   notifications       Notification[]
   paymentHistories    PaymentHistory[]
   auth                Auth?
+}
+
+model CurrentPosition {
+  id        Int   @id @default(autoincrement())
+  latitude  Float
+  longitude Float
+  userId    Int   @unique
+  user      User  @relation(fields: [userId], references: [id])
 }
 
 model Admin {
