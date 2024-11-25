@@ -1,31 +1,30 @@
-// services/assessmentService.ts
 import axiosInstance from '@/lib/axiosInstance';
+import { Assessment, CompleteAssessmentPayload } from "@/types/assessments";
 
-// Fetch available assessments for the user
-export const getUserAssessments = async (userId: number) => {
-    const response = await axiosInstance.get(`/assessments/user`, {
-        params: { userId },
-    });
-    return response.data;
+export const fetchUserAssessments = async (userId: number) => {
+    try {
+        const response = await axiosInstance.get(`/assessments/user/${userId}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching assessments:', error);
+        throw error;
+    }
 };
 
-// Fetch questions for a specific assessment
-export const getAssessmentQuestions = async (assessmentId: number) => {
-    const response = await axiosInstance.get(`/assessments/${assessmentId}`);
-    return response.data.questions;
+export const completeAssessment = async (userId: number, payload: CompleteAssessmentPayload) => {
+    try {
+        const response = await axiosInstance.post('/assessments/complete', {
+            ...payload,
+            userId,
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error completing assessment:', error);
+        throw error;
+    }
 };
 
-// Submit answers for an assessment
-export const completeAssessment = async (assessmentId: number, answers: string[]) => {
-    const response = await axiosInstance.post(`/assessments/complete`, {
-        assessmentId,
-        answers,
-    });
-    return response.data;
-};
-
-// Start a new assessment by fetching questions
-export const startAssessment = async (assessmentId: number) => {
-    const response = await axiosInstance.get(`/assessments/${assessmentId}`);
-    return response.data;
-};
+export const createAssessment = async (assessmentData: Assessment): Promise<any> => {
+    const response = await axiosInstance.post('/assessments', assessmentData)
+    return response.data
+}

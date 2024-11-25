@@ -1,29 +1,26 @@
 export interface Question {
     content: string;
     options: string[];
-    correctAnswer: string;
+    correctAnswer?: string; // Include only if necessary for the developer
 }
 
-export interface SkillAssessment {
+export interface Assessment {
     id: number;
     title: string;
     description: string;
     difficultyLevel: string;
-    questionCount: number;
-    isActive: boolean;
+    developerId: number;
     questions: Question[];
 }
 
-export interface UserAssessment {
-    userId: number;
-    assessmentId: number;
-    score: number;
-    passed: boolean;
-    completedAt: string;
-}
-
-export interface SubmitAssessment {
+export interface CompleteAssessmentPayload {
     assessmentId: number;
     answers: string[];
     userId: number;
+}
+
+export interface AssessmentResult {
+    message: string;
+    score: number;
+    passed: boolean;
 }

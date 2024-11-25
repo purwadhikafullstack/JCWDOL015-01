@@ -134,6 +134,10 @@ export const getPendingSubscriptions = async (req: Request, res: Response) => {
             },
         });
 
+        if (pendingSubscriptions.length === 0) {
+            return res.status(404).send({message: 'No Subscriptions Found'})
+        }
+
         return res.status(200).json(pendingSubscriptions);
     } catch (error) {
         return res.status(500).json({ message: "Error fetching pending subscriptions", error });

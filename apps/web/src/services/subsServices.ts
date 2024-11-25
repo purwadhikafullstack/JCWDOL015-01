@@ -25,19 +25,27 @@ export const getUserSubscriptions = async (userId: number): Promise<User> => {
 };
 
 
-export async function fetchPendingSubscriptions(developerId: number) {
-    const response = await axiosInstance.get(`/subscriptions/pending/${developerId}`);
+export async function fetchPendingSubscriptions() {
+    const response = await axiosInstance.get(`/subscriptions/pending`, {
+        headers: {
+            'x-developer-id': 1
+        }
+    })
     return response.data;
 }
 
-export async function approveSubscription(data: {
+export async function approveSubscription(dataApprove: {
     id: number;
     userId: number;
     subscriptionType: string;
     developerId: number;
 }) {
     try {
-        const response = await axiosInstance.put(`/subscriptions/approve/${data.developerId}`, data);
+        const response = await axiosInstance.put('/subscriptions/approve', dataApprove, {
+            headers: {
+                'x-developer-id': dataApprove.developerId
+            }
+        });
         return response.data;
     } catch (error: any) {
         throw new Error(error.response?.data?.message || "Error approving subscription");

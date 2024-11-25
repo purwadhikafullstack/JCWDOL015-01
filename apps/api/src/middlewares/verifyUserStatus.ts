@@ -1,4 +1,3 @@
-
 import { Request, Response, NextFunction } from 'express';
 import { PrismaClient } from '@prisma/client';
 
@@ -7,11 +6,11 @@ const prisma = new PrismaClient();
 export const verifyUserStatus = async (req: Request, res: Response, next: NextFunction) => {
     const { userId } = req.body;
 
-    if (!userId) return res.status(400).send({message: 'User was not found on request'})
-    
+    if (!userId) return res.status(400).send({ message: 'User was not found on request' });
+
     try {
         const user = await prisma.user.findUnique({
-            where: { id: userId },
+            where: { id: Number(userId) },
             select: {
                 id: true,
                 isVerified: true,
@@ -27,13 +26,13 @@ export const verifyUserStatus = async (req: Request, res: Response, next: NextFu
         const currentDate = new Date();
         if (user.subscriptionType && user.subscriptionEndDate && user.subscriptionEndDate > currentDate) {
             await prisma.user.update({
-                where: { id: userId },
+                where: { id: Number(userId) },
                 data: { isVerified: true },
             });
             next();
         } else {
             await prisma.user.update({
-                where: { id: userId },
+                where: { id: Number(userId) },
                 data: { isVerified: false },
             });
             return res.status(403).json({ message: 'User is not verified. Please purchase a subscription.' });

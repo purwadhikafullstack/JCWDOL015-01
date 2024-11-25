@@ -9,13 +9,11 @@ const DeveloperDashboard = () => {
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
 
-    const developerId = 1
-
     useEffect(() => {
         const getPending = async () => {
             setLoading(true);
             try {
-                const data = await fetchPendingSubscriptions(developerId);
+                const data = await fetchPendingSubscriptions();
                 setSubscriptions(data);
             } catch (err: any) {
                 setError(err.message);

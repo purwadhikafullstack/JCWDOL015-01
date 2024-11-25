@@ -23,12 +23,12 @@ router.post('/reviews/submit', verifyUserStatus, submitReview);
 
 router.get('/reviews/:companyId', getReviewsByCompany);
 
-router.post('/assessments/complete', completeAssessment)
-router.get('/assessments/user', getUserAssessments)
+router.post('/assessments/complete', verifyUserStatus, completeAssessment)
+router.get('/assessments/user/:userId', getUserAssessments)
 
 /** Developer Routes */
-router.put('/subscriptions/approve/:developerId', verifyDeveloperRole, approvePayment)
-router.get('/subscriptions/pending/:developerId', verifyDeveloperRole, getPendingSubscriptions);
+router.put('/subscriptions/approve', verifyDeveloperRole, approvePayment)
+router.get('/subscriptions/pending', verifyDeveloperRole, getPendingSubscriptions);
 router.post('/assessments', verifyDeveloperRole, createAssessment)
 
 /** Admin Routes */
