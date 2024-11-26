@@ -1,7 +1,7 @@
-import { addAnonymousReview, addCompanyRating, getReviewsByCompany, salaryReview, submitReview } from "@/controllers/companyRev.controller";
+import { addAnonymousReview, getReviewsByCompany } from "@/controllers/companyRev.controller";
 import { generateCV } from "@/controllers/cvGen.controller";
 import { completeAssessment, createAssessment, getUserAssessments } from "@/controllers/skillAssesment.controller";
-import { approvePayment, getAllSubscriptions, getPendingSubscriptions, getSubscriptionCategories, getUserSubsandPayDetails, purchaseSubscription } from "@/controllers/subs.controller";
+import { approvePayment, getPendingSubscriptions, getSubscriptionCategories, getUserSubsandPayDetails, purchaseSubscription } from "@/controllers/subs.controller";
 import { VerifyEmployee } from "@/middlewares/verifyEmployee"
 import { checkSubscription } from "@/middlewares/checkSubs";
 import { verifyDeveloperRole } from "@/middlewares/verifyDevRole";
@@ -15,23 +15,17 @@ router.get('/subscriptions', getSubscriptionCategories)
 router.post('/subscriptions/purchase', purchaseSubscription)
 router.get('/subscriptions/user/:id', getUserSubsandPayDetails)
 router.get('/generate-cv', checkSubscription, generateCV)
-
-router.post('/reviews/anonymous', addAnonymousReview);
-router.post('/reviews/company', verifyUserStatus, addCompanyRating);
-router.post('/reviews/salary', verifyUserStatus, salaryReview);
-router.post('/reviews/submit', verifyUserStatus, submitReview);
-
-router.get('/reviews/:companyId', getReviewsByCompany);
-
+router.post('/reviews/anonymous', verifyUserStatus, addAnonymousReview);
 router.post('/assessments/complete', verifyUserStatus, completeAssessment)
 router.get('/assessments/user/:userId', getUserAssessments)
 
 /** Developer Routes */
 router.put('/subscriptions/approve', verifyDeveloperRole, approvePayment)
-router.get('/subscriptions/pending', verifyDeveloperRole, getPendingSubscriptions);
+router.get('/subscriptions/pending', verifyDeveloperRole, getPendingSubscriptions)
 router.post('/assessments', verifyDeveloperRole, createAssessment)
 
 /** Admin Routes */
-router.get('/subscriptions/categories', verifyDeveloperRole, getSubscriptionCategories)
+router.get('/subscriptions/categories', VerifyEmployee, getSubscriptionCategories)
+router.get('/reviews/:companyId', getReviewsByCompany);
 
 export default router

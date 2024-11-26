@@ -1,6 +1,6 @@
 'use client'
 
-import UserAssessments from "@/components/Assessment/assessmentPage"
+import UserAssessmentsPage from "@/components/Assessment/assessmentPage"
 import Link from "next/link"
 
 export default function Assessment() {
@@ -28,7 +28,7 @@ export default function Assessment() {
 
             {/* User Assessments Component */}
             <div className="mt-6">
-                <UserAssessments userId={1} />
+                <UserAssessmentsPage userId={1} />
             </div>
         </div>
 

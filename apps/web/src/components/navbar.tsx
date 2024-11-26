@@ -7,7 +7,7 @@ const Navbar: React.FC = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     return (
-        <nav className="bg-blue-500 text-white">
+        <nav className="bg-blue-500 text-white sticky top-0 z-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
                     {/* Logo */}
@@ -17,7 +17,6 @@ const Navbar: React.FC = () => {
                         </Link>
                     </div>
 
-                    {/* Desktop Menu */}
                     <div className="hidden md:flex space-x-6">
                         <Link href="/subscriptions">
                             <p className="hover:text-blue-200">Subscriptions</p>
@@ -30,7 +29,6 @@ const Navbar: React.FC = () => {
                         </Link>
                     </div>
 
-                    {/* Mobile Menu Button */}
                     <div className="md:hidden flex items-center">
                         <button
                             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -64,7 +62,6 @@ const Navbar: React.FC = () => {
                 </div>
             </div>
 
-            {/* Mobile Menu */}
             {isMenuOpen && (
                 <div className="md:hidden bg-blue-600">
                     <div className="flex flex-col space-y-2 px-4 py-2">

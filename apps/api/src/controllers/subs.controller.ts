@@ -152,18 +152,21 @@ const subscriptionCategories = {
         cost: 0,
         features: ['Basic access'],
         durationInDays: 7,
+        maxAssessments: 0,
     },
     [SubscriptionType.STANDARD]: {
         type: SubscriptionType.STANDARD,
         cost: 25000,
         features: ['CV Generator', 'Skill Assessment 2 kali'],
         durationInDays: 30,
+        maxAssessments: 2,
     },
     [SubscriptionType.PROFESSIONAL]: {
         type: SubscriptionType.PROFESSIONAL,
         cost: 100000,
         features: ['CV Generator', 'Skill Assessment unlimited', 'Priority review when apply job'],
         durationInDays: 30,
+        maxAssessments: -1,
     },
 };
 

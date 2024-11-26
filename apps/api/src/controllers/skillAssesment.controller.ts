@@ -1,135 +1,195 @@
 import { Request, Response } from 'express';
-import { DifficultyLevel, PrismaClient } from '@prisma/client';
-import { sendDeveloperNotification } from '@/helper/nodemailer';
+import { DifficultyLevel, PrismaClient, SubscriptionType, SubsStatus } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 export const createAssessment = async (req: Request, res: Response) => {
-  const { title, description, questions } = req.body;
-  const developerId = Number(req.params.developerId)
+    const { title, description, questions, difficultyLevel, developerId } = req.body
 
-  try {
-    const assessment = await prisma.skillAssessment.create({
-      data: {
-        title,
-        description,
-        difficultyLevel: DifficultyLevel.EASY || DifficultyLevel.MEDIUM || DifficultyLevel.HARD,
-        questionCount: questions.length,
-        isActive: true,
-        developer: {
-          connect: { id: developerId }
-        },
-        Question: {
-          create: questions.map((q: any) => ({
-            content: q.content,
-            options: q.options,
-            correctAnswer: q.correctAnswer,
-          })),
-        },
-      },
-    });
+    const validDifficulties = [DifficultyLevel.EASY, DifficultyLevel.MEDIUM, DifficultyLevel.HARD]
+    const selectedDifficulty = validDifficulties.includes(difficultyLevel)
+        ? difficultyLevel : DifficultyLevel.EASY
 
-    res.status(201).json({ message: 'Assessment berhasil dibuat', assessment });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Gagal membuat assessment' });
-  }
+    try {
+        const assessment = await prisma.skillAssessment.create({
+            data: {
+                title,
+                description,
+                difficultyLevel: selectedDifficulty,
+                questionCount: questions.length,
+                isActive: true,
+                developer: {
+                    connect: { id: developerId }
+                },
+                Question: {
+                    create: questions.map((q: any) => ({
+                        content: q.content,
+                        options: q.options,
+                        correctAnswer: q.correctAnswer,
+                    })),
+                },
+            },
+        });
+
+        res.status(201).json({ message: 'Assessment berhasil dibuat', assessment });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Gagal membuat assessment' });
+    }
 };
 
 export const getUserAssessments = async (req: Request, res: Response) => {
-  const { userId } = req.params;  // Assuming userId comes from the route parameter
+    const { userId } = req.params;
 
-  if (!userId || isNaN(Number(userId))) {
-      return res.status(400).json({ message: "User ID is required" });
-  }
+    if (!userId || isNaN(Number(userId))) {
+        return res.status(400).json({ message: "User ID is required" });
+    }
 
-  try {
-      const completedAssessments = await prisma.userAssessment.findMany({
-          where: { userId: Number(userId) },
-          select: { assessmentId: true },
-      });
+    try {
+        const user = await prisma.user.findUnique({
+            where: { id: Number(userId) },
+            include: {
+                subscriptions: true,
+                UserAssessment: true,
+            },
+        });
 
-      const completedIds = completedAssessments.map((assessment) => assessment.assessmentId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
 
-      const incompleteAssessments = await prisma.skillAssessment.findMany({
-          where: {
-              id: {
-                  notIn: completedIds,
-              },
-          },
-          include: { Question: true },
-      });
+        // Get the completed assessments
+        const completedAssessments = user.UserAssessment.length;
 
-      const formattedAssessments = incompleteAssessments.map((assessment) => ({
-          id: assessment.id,
-          title: assessment.title,
-          description: assessment.description,
-          difficultyLevel: assessment.difficultyLevel,
-          developerId: assessment.developerId,
-          questions: assessment.Question.map((q) => ({
-              content: q.content,
-              options: q.options,
-          })),
-      }));
+        // Calculate remaining assessments based on subscription type
+        const limit = user.subscriptions[0]?.type === SubscriptionType.STANDARD ? 2 : Infinity
+        const remainingAssessments = limit - completedAssessments;
 
-      res.status(200).json(formattedAssessments);
-  } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Failed to fetch assessments." });
-  }
+        // Get the incomplete assessments
+        const completedIds = user.UserAssessment.map((assessment) => assessment.assessmentId);
+        const incompleteAssessments = await prisma.skillAssessment.findMany({
+            where: {
+                id: {
+                    notIn: completedIds,
+                },
+            },
+            include: { Question: true },
+        });
+
+        const formattedAssessments = incompleteAssessments.map((assessment) => ({
+            id: assessment.id,
+            title: assessment.title,
+            description: assessment.description,
+            difficultyLevel: assessment.difficultyLevel,
+            developerId: assessment.developerId,
+            questions: assessment.Question.map((q) => ({
+                content: q.content,
+                options: q.options,
+            })),
+        }));
+
+        // Send the response with assessments, subscription info, and remaining assessments
+        res.status(200).json({
+            Assessments: formattedAssessments,
+            Subs: {
+                type: user.subscriptions[0]?.type,
+                completedAssessments,
+                remainingAssessments, // Return the calculated remaining assessments
+            },
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Failed to fetch assessments." });
+    }
 };
 
-// Controller to complete assessment
+
 export const completeAssessment = async (req: Request, res: Response) => {
-  const { userId, assessmentId, answers } = req.body;
+    const { userId, assessmentId, answers } = req.body;
 
-  if (!assessmentId || !answers || !userId) {
-      return res.status(400).json({ message: "Missing required fields (assessmentId, answers, userId)" });
-  }
+    if (!assessmentId || !answers || !userId) {
+        return res.status(400).json({ message: "Missing required fields (assessmentId, answers, userId)" });
+    }
 
-  try {
-      const assessment = await prisma.skillAssessment.findUnique({
-          where: { id: assessmentId },
-          include: { Question: true },
-      });
+    try {
+        const user = await prisma.user.findUnique({
+            where: { id: Number(userId) },
+            include: {
+                subscriptions: {
+                    where: { status: SubsStatus.Operating }
+                }
+            }
+        })
 
-      if (!assessment) {
-          return res.status(404).json({ message: "Assessment not found." });
-      }
+        if (!user || user.subscriptions.length === 0) {
+            return res.status(400).send({ message: "User does not have an active Subscriptions" })
+        }
 
-      if (assessment.Question.length !== answers.length) {
-          return res.status(400).json({
-              message: `Number of answers (${answers.length}) does not match the number of questions (${assessment.Question.length}).`,
-          });
-      }
+        const subsFindStatus = user.subscriptions[0]
+        const isProfessional = subsFindStatus.type === SubscriptionType.PROFESSIONAL
+        const isStandard = subsFindStatus.type === SubscriptionType.STANDARD
 
-      let score = 0;
-      assessment.Question.forEach((question, index) => {
-          if (question.correctAnswer === answers[index]) {
-              score += 4;
-          }
-      });
+        if (isStandard) {
+            const completedCount = await prisma.userAssessment.count({
+                where: {
+                    userId: parseInt(userId, 10),
+                    completedAt: {
+                        gte: subsFindStatus.startDate,
+                        lte: subsFindStatus.endDate
+                    }
+                }
+            })
+            if (completedCount >= 2) {
+                return res.status(403).json({
+                    message: "You have reached the maximum number of assessments for your subscription.",
+                    completedCount,
+                    limit: 2,
+                })
+            }
+        }
 
-      const totalScore = assessment.Question.length * 4;
-      const passed = score >= totalScore * 0.75;
+        const assessment = await prisma.skillAssessment.findUnique({
+            where: { id: assessmentId },
+            include: { Question: true },
+        })
 
-      await prisma.userAssessment.create({
-          data: {
-              userId: parseInt(userId, 10),
-              assessmentId,
-              score,
-              passed,
-              completedAt: new Date(),
-          },
-      });
+        if (!assessment) {
+            return res.status(404).json({ message: "Assessment not found." })
+        }
 
-      res.status(200).json({
-          message: "Assessment completed successfully.",
-          score,
-          passed,
-      });
-  } catch (error) {
-      console.error("Error completing assessment:", error);
-      res.status(500).json({ message: "Failed to complete the assessment." });
-  }
+        if (assessment.Question.length !== answers.length) {
+            return res.status(400).json({
+                message: `Number of answers (${answers.length}) does not match the number of questions (${assessment.Question.length}).`,
+            })
+        }
+
+        let score = 0;
+        assessment.Question.forEach((question, index) => {
+            if (question.correctAnswer === answers[index]) {
+                score += 4;
+            }
+        })
+
+        const totalScore = assessment.Question.length * 4
+        const passed = score >= totalScore * 0.75
+
+        await prisma.userAssessment.create({
+            data: {
+                userId: parseInt(userId, 10),
+                assessmentId,
+                score,
+                passed,
+                completedAt: new Date(),
+            },
+        });
+
+        res.status(200).json({
+            message: "Assessment completed successfully.",
+            score,
+            passed,
+        });
+    } catch (error) {
+        console.error("Error completing assessment:", error);
+        res.status(500).json({ message: "Failed to complete the assessment." })
+    }
 };

@@ -10,7 +10,7 @@ import { SubscriptionCategory, UserSubscription } from '@/types/subscriptions';
 const SubscriptionPage: React.FC = () => {
     const [categories, setCategories] = useState<SubscriptionCategory[]>([]);
     const [userSubscription, setUserSubscription] = useState<UserSubscription | null>(null);
-    const userId = 1; // Replace with actual userId logic
+    const userId = 1;
 
     useEffect(() => {
         async function fetchData() {
@@ -19,7 +19,7 @@ const SubscriptionPage: React.FC = () => {
 
             const user = await getUserSubscriptions(userId);
             if (user?.subscriptions?.length) {
-                setUserSubscription(user.subscriptions[0]); // Assuming the first is active
+                setUserSubscription(user.subscriptions[0]);
             }
         }
 
@@ -40,7 +40,6 @@ const SubscriptionPage: React.FC = () => {
 
     return (
         <div className="p-6 bg-gradient-to-b from-gray-50 to-gray-100 min-h-screen">
-            {/* User Subscription */}
             {userSubscription ? (
                 <div className="mb-8 p-6 bg-white rounded-lg shadow-lg">
                     <UserSubs subscription={userSubscription} />
@@ -51,7 +50,6 @@ const SubscriptionPage: React.FC = () => {
                 </p>
             )}
 
-            {/* Subscription Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {categories.map((category, index) => (
                     <SubscriptionCard
