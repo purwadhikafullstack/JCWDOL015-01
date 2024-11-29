@@ -62,6 +62,13 @@ export class AdminController {
       
       const token = sign(payload, process.env.JWT!);
 
+      // change to this secure cookie for production
+      // res.setHeader('Set-Cookie', `token=${token}; HttpOnly; Secure; SameSite=Strict; Path=/;`);
+      // for localhost
+      const date = new Date(Date.now() + 86400000).toUTCString();
+      res.setHeader('Set-Cookie', `token=${token}; HttpOnly; Path=/; expires=${date}`);
+      res.append('Set-Cookie', `isAdmin=true; HttpOnly; Path=/; expires=${date};`);
+
       return res.status(200).send({
         status: 'success',
         message: 'Login successful',

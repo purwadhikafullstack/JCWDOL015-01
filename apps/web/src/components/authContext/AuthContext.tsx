@@ -9,6 +9,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import { clearProfile, setProfile } from '@/app/store/slices/userSlice';
+import axios from 'axios';
 
 interface AuthContextType {
   token: string | null;
@@ -92,10 +93,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const onLogout = async () => {
+    await axios.post(`http://localhost:8000/api/user/logout`, {}, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
+      withCredentials: true
+    });
     setToken(null);
     setTokenAdmin(null);
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
     dispatch(clearProfile());
     toast.success('Logout successful');
     router.refresh();

@@ -43,6 +43,7 @@ export const loginUser = async (data: ILogin) => {
       headers: {
         'Content-Type': 'application/json',
       },
+      withCredentials: true,
     });
     console.log(res.data);
     return { result: res.data, ok: true };

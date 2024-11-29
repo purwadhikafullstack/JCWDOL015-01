@@ -12,6 +12,7 @@ export const Header = () => {
 
   let isAdmin = pathname.startsWith('/admin');
   if (tokenAdmin) {
+
     isAdmin = true;
   }
 
@@ -97,6 +98,13 @@ export const Header = () => {
             {token && (
               <div className='flex flex-row justify-center gap-2'>
                 <div>{user.name}</div>
+
+                {user.isAdmin && (
+                  <Link href="/dashboard" className="flex items-center">
+                    Dashboard
+                  </Link>
+                )}
+                
                 <div className="flex items-center">|</div>
                 <button onClick={onLogout} className="flex items-center">
                   Logout

@@ -21,6 +21,7 @@ export class UserRouter {
     this.router.post('/reset-password', verifyToken, this.userController.resetPassword);
     this.router.post('/check-email', validateCheckEmail, this.userController.checkEmail);
     this.router.post('/is-verified', verifyToken, this.userController.isVerified);
+    this.router.post('/logout', verifyToken, this.userController.logout);
     this.router.put('/default-password', this.userController.setDefaultPassword);
   }
 

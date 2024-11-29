@@ -174,6 +174,13 @@ export class UserController {
       const payload = { id: user.id, email: user.email };
       const token = sign(payload, process.env.JWT!);
 
+      // change to this secure cookie for production
+      // res.setHeader('Set-Cookie', `token=${token}; HttpOnly; Secure; SameSite=Strict; Path=/;`);
+      // for localhost
+      const date = new Date(Date.now() + 86400000).toUTCString();
+      res.setHeader('Set-Cookie', `token=${token}; HttpOnly; Path=/; expires=${date};`);
+      res.append('Set-Cookie', `isAdmin=false; HttpOnly; Path=/; expires=${date};`);
+
       return res.status(200).send({
         status: 'success',
         message: 'Login successful',
@@ -309,6 +316,23 @@ export class UserController {
       return res.status(200).send({
         status: 'success',
         message: 'Password reset successful',
+      });
+    } catch (error) {
+      return res.status(400).send({
+        status: 'error',
+        message: 'Error',
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  async logout(req: Request, res: Response) {
+    try {
+      res.setHeader('Set-Cookie', 'token=; HttpOnly; Path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT;');
+      res.append('Set-Cookie', 'isAdmin=; HttpOnly; Path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT;');
+      return res.status(200).send({
+        status: 'success',
+        message: 'Logout successful',
       });
     } catch (error) {
       return res.status(400).send({

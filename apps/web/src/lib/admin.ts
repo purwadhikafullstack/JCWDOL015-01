@@ -23,6 +23,7 @@ export const loginAdmin = async (data: ILoginAdmin) => {
       headers: {
         'Content-Type': 'application/json',
       },
+      withCredentials: true,
     });
     return { result: res, ok: true };
   } catch (error: any) {
