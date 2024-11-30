@@ -13,6 +13,7 @@ import {
 
 import { getTestsByJobId } from '@/services/test.service';
 import { checkApplicant, createApplicant } from '@/services/applicant.service';
+import upload from '@/types/multer';
 
 const prisma = new PrismaClient();
 
@@ -114,6 +115,7 @@ export class JobController {
         published: req.body.is_published === 'true',
       };
       delete jobData.is_published;
+      console.log(req.file);
       const banner = req.file ? `/uploads/${req.file.filename}` : undefined;
       const job = await createJobService({ ...jobData, banner });
       return res.status(201).json(job);

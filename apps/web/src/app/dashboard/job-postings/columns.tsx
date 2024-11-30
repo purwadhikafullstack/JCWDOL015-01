@@ -64,6 +64,10 @@ export const columns: ColumnDef<Job>[] = [
   {
     accessorKey: 'banner',
     header: 'Banners',
+    cell: ({ row }) => {
+      const job = row.original;
+      return <img src={job.banner} alt={job.title} width={100} height={100} />;
+    }
   },
   {
     accessorKey: 'category',
