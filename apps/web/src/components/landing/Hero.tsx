@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function Hero() {
   const images = ['/hero1.png', '/hero2.png', '/hero3.png'];
@@ -15,7 +16,7 @@ export default function Hero() {
   }, []);
 
   return (
-    <div className="relative w-full h-[800px] bg-gradient-to-b from-blue-500 to-blue-900">
+    <div className="relative w-full h-[500px] bg-gradient-to-b from-blue-500 to-blue-900">
       <div className="absolute inset-0">
         <Image
           src={images[currentImage]}
@@ -33,18 +34,12 @@ export default function Hero() {
           Unlock your potential with career opportunities tailored to your skills and aspirations.
         </p>
         <div className="flex gap-4">
-          <a
-            href="#filter"
+          <Link
+            href={`/jobs`}
             className="px-6 py-3 bg-blue-600 rounded-full text-white font-semibold hover:bg-blue-700 transition"
           >
             Explore Jobs
-          </a>
-          <a
-            href="#discover"
-            className="px-6 py-3 bg-white text-blue-600 rounded-full font-semibold hover:bg-gray-200 transition"
-          >
-            Learn More
-          </a>
+          </Link>
         </div>
       </div>
     </div>

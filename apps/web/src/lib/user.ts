@@ -65,7 +65,7 @@ export const checkEmail = async (data: ICheckEmail) => {
     const res = await axios.post(
       `${link}/user/check-email`,
       {
-        email: data.email, // Directly pass the email
+        email: data.email, 
       },
       {
         headers: {
@@ -96,12 +96,13 @@ export const resetPassword = async (data: IReset, token: string) => {
   }
 };
 
-export const isVerified = async () => {
+export const isVerified = async (email: string) => {
   try {
     const res = await axios.post(`${link}/user/is-verified`, {
       headers: {
         'Content-Type': 'application/json',
       },
+      email,
     });
     return { result: res.data, ok: true };
   } catch (error) {
@@ -160,13 +161,16 @@ export const changeProfilePicture = async (
   token: string,
 ) => {
   try {
-  
-    const res = await axios.post(`${link}/user/change-profile-picture`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data', // Ensure correct content type for file uploads
-        Authorization: `Bearer ${token}`,
+    const res = await axios.post(
+      `${link}/user/change-profile-picture`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data', 
+          Authorization: `Bearer ${token}`,
+        },
       },
-    });
+    );
     return { result: res.data, ok: true };
   } catch (error) {
     const err = error as any;
@@ -189,3 +193,52 @@ export const saveLocation = async (data: ILocation, token: string) => {
   }
 };
 
+export const dashboardVerify = async (email: string) => {
+  try {
+    const res = await axios.post(`${link}/user/dashboard-verify`, {
+      email,
+    });
+    return { result: res.data, ok: true };
+  } catch (error) {
+    const err = error as any;
+    return { result: err.response?.data || 'Connection error', ok: false };
+  }
+};
+
+export const savedJobs = async (userId: number, jobId:number ) => {
+  try {
+    const res = await axios.post(`${link}/user/save-jobs`, {
+      userId,
+      jobId,
+    });
+    return { result: res.data, ok: true };
+  } catch (error) {
+    const err = error as any;
+    return { result: err.response?.data || 'Connection error', ok: false };
+  }
+};
+
+export const removeSavedJob = async (userId: number, jobId:number ) => {
+  try {
+    const res = await axios.post(`${link}/user/remove-saved-job`, {
+      userId,
+      jobId,
+    });
+    return { result: res.data, ok: true };
+  } catch (error) {
+    const err = error as any;
+    return { result: err.response?.data || 'Connection error', ok: false };
+  }
+};
+
+export const getSavedJobs = async (userId: number) => {
+  try {
+    const res = await axios.post(`${link}/user/saved-jobs`, {
+      userId,
+    });
+    return { result: res.data, ok: true };
+  } catch (error) {
+    const err = error as any;
+    return { result: err.response?.data || 'Connection error', ok: false };
+  }
+}

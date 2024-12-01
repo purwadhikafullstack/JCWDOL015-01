@@ -42,16 +42,13 @@ import { createContext, useContext, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import { clearProfile, setProfile } from '@/app/store/slices/userSlice';
-import {
-  createAdminToken,
-  createToken,
-  deleteAdminToken,
-  deleteToken,
-} from '@/lib/token';
+import { createCookie, deleteCookie } from '@/lib/cookie';
 import {
   clearAdminProfile,
   setAdminProfile,
 } from '@/app/store/slices/adminSlice';
+import { useAppSelector } from '@/app/store/hooks';
+import { ok } from 'assert';
 
 interface AuthContextType {
   token: string | null;
@@ -101,50 +98,57 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const params = useParams();
   const router = useRouter();
   const dispatch = useDispatch();
+  const profile = useAppSelector((state) => state.user.profile);
+
   const onLogin = async (data: ILogin, action: FormikHelpers<ILogin>) => {
-    try {
-      const { result, ok } = await loginUser(data);
-      if (result?.user?.isBlocked === true) {
-        toast.error('Your account is blocked');
-        router.push('/user/blocked');
-        return;
-      }
-
-      if (result?.user?.isVerified === false) {
-        router.push('/');
-        dispatch(setProfile(result.user));
-        console.log(result.user);
-        return;
-      }
-
-      if (ok && result.token) {
-        toast.success('Login successful');
-        dispatch(setProfile(result.user));
-        createToken(result.token);
-        setToken(result.token);
-        action.resetForm();
-        router.back();
-        return;
-      }
-    } catch (error) {
-      console.log(error);
-      toast.error('Login failed, please try again');
+    const { result, ok } = await loginUser(data);
+    if (result?.isBlocked) {
+      toast.error(result.message);
+      router.push('/user/blocked');
+      return;
     }
+
+    if (result?.user?.isVerified === false) {
+      dispatch(setProfile(result.user));
+      createCookie('token', result.token);
+      setToken(result.token);
+      toast.success(result.message);
+      router.push('/');
+      return;
+    }
+
+    if (ok && result.token) {
+      dispatch(setProfile(result.user));
+      createCookie('token', result.token);
+      setToken(result.token);
+      toast.success(result.message);
+      action.resetForm();
+      router.back();
+      return;
+    }
+    toast.error(result.message);
   };
 
   const onVerified = async () => {
-    try {
-      const { result } = await isVerified();
-      if (result.data.isVerified === true) {
-        return setVerified(true);
-      }
-    } catch (error) {
-      console.log(error);
+    if (!profile) {
+      toast.error('Please login to apply or save jobs');
+      return router.push('/user/login');
+    }
+    const { result, ok } = await isVerified(profile?.email);
+    if (!result && !ok) {
+      setVerified(false);
+      toast.error('Verification failed');
+      return;
+    } else if (ok && result.user.isVerified) {
+      setVerified(true);
+      
+      return;
     }
   };
 
   const onLogout = async () => {
-    await deleteToken();
+    await deleteCookie('token');
+    await deleteCookie('userLocation');
     setToken('');
     dispatch(clearProfile());
     toast.success('Logout successful');
@@ -156,148 +160,116 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     data: ICheckEmail,
     action: FormikHelpers<ICheckEmail>,
   ) => {
-    try {
-      const { result, ok } = await checkEmail(data);
-      if (ok) {
-        toast.success(
-          'An Email has been sent to you. Please check and complete the process.',
-        );
-        action.resetForm();
-        router.push('/user/login');
-        return;
-      }
-      toast.error(result.message);
-    } catch (error) {
-      console.log(error);
+    const { result, ok } = await checkEmail(data);
+    if (ok) {
+      toast.success(result.message);
+      action.resetForm();
+      router.push('/user/login');
+      return;
     }
+    toast.error(result.message);
   };
 
   const onResetPassword = async (
     data: IReset,
     action: FormikHelpers<IReset>,
   ) => {
-    try {
-      const resetToken = Array.isArray(params?.token)
-        ? params.token[0]
-        : params?.token;
-      const { result, ok } = await resetPassword(data, resetToken);
-      if (ok) {
-        toast.success(
-          'Reset password successful. Please login with your new password.',
-        );
-        action.resetForm();
-        router.push('/');
-        return;
-      }
-      toast.error(result.message);
-    } catch (error) {
-      console.log(error);
+    const resetToken = Array.isArray(params?.token)
+      ? params.token[0]
+      : params?.token;
+    const { result, ok } = await resetPassword(data, resetToken);
+    if (ok) {
+      toast.success(result.message);
+      action.resetForm();
+      router.push('/');
+      return;
     }
+    toast.error(result.message);
   };
 
   const onChangingProfile = async (data: IChangeProfile) => {
-    try {
-      const { result, ok } = await changeProfile(data, token);
-
-      if (ok) {
-        toast.success('Profile updated');
-        dispatch(setProfile(result.updatedUser));
-        return;
-      }
-    } catch (error) {
-      console.log(error);
+    const { result, ok } = await changeProfile(data, token);
+    if (ok) {
+      toast.success(result.message);
+      dispatch(setProfile(result.updatedUser));
+      return;
     }
+    toast.error(result.message);
   };
 
   const onChangingEmail = async (data: IChangeEmail) => {
-    try {
-      const { result, ok } = await changeEmail(data, token);
-      if (ok) {
-        toast.success('Email updated');
-        dispatch(clearProfile());
-        setToken('');
-        router.push('/');
-        return;
-      }
-    } catch (error) {
-      console.log(error);
+    const { result, ok } = await changeEmail(data, token);
+    if (ok) {
+      toast.success(result.message);
+      dispatch(clearProfile());
+      setToken('');
+      router.push('/');
+      return;
     }
+    toast.error(result.message);
   };
 
   const onChangingPassword = async (
     data: IChangePassword,
     action: FormikHelpers<IChangePassword>,
   ) => {
-    try {
-      const { result, ok } = await changePassword(data, token);
-      if (ok) {
-        toast.success('Password updated');
-        action.resetForm();
-        setToken('');
-        dispatch(clearProfile());
-        router.push('/');
-        return;
-      }
-    } catch (error) {
-      console.log(error);
+    const { result, ok } = await changePassword(data, token);
+    if (ok) {
+      toast.success(result.message);
+      action.resetForm();
+      setToken('');
+      dispatch(clearProfile());
+      router.push('/');
+      return;
     }
+    toast.error(result.message);
   };
 
   const onChangingProfilePicture = async (formData: FormData) => {
-    try {
-      const { result, ok } = await changeProfilePicture(formData, token);
-      if (ok) {
-        toast.success('Profile picture updated');
-        dispatch(setProfile(result.updatedUser));
-        router.push('/');
-        return;
-      }
-    } catch (error) {
-      console.error(error);
+    const { result, ok } = await changeProfilePicture(formData, token);
+    if (ok) {
+      toast.success(result.message);
+      dispatch(setProfile(result.updatedUser));
+      router.push('/');
+      return;
     }
+    toast.error(result.message);
   };
 
   const onSavingLocation = async (data: ILocation) => {
-    try {
-      const { result, ok } = await saveLocation(data, token);
-      if (ok) {
-        toast.success('Location saved');
-        return;
-      }
-    } catch (error) {
-      console.error(error);
+    const { result, ok } = await saveLocation(data, token);
+    if (ok) {
+      toast.success(result.message);
+      return;
     }
+    toast.error(result.message);
   };
 
   const onAdminLogin = async (
     data: ILoginAdmin,
     action: FormikHelpers<ILoginAdmin>,
   ) => {
-    try {
-      const { result, ok } = await loginAdmin(data);
-      if (result?.admin?.isBlocked === true) {
-        toast.error('Your account is blocked');
-        router.push('/admin/blocked');
-        return;
-      }
-
-      if (ok && result.token) {
-        toast.success('Login successful');
-        dispatch(setAdminProfile(result.admin));
-        createAdminToken(result.token);
-        setAdminToken(result.token);
-        action.resetForm();
-        router.back();
-        return;
-      }
-    } catch (error) {
-      console.log(error);
-      toast.error('Login failed, please try again');
+    const { result, ok } = await loginAdmin(data);
+    if (result?.admin?.isBlocked === true) {
+      toast.error(result.message);
+      router.push('/admin/blocked');
+      return;
     }
+
+    if (ok && result.token) {
+      toast.success(result.message);
+      dispatch(setAdminProfile(result.admin));
+      createCookie('adminToken', result.token);
+      setAdminToken(result.token);
+      action.resetForm();
+      router.back();
+      return;
+    }
+    toast.error(result.message);
   };
 
   const onAdminLogout = async () => {
-    await deleteAdminToken();
+    await deleteCookie('adminToken');
     setAdminToken('');
     dispatch(clearAdminProfile());
     toast.success('Logout successful');
@@ -309,105 +281,80 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     data: ICheckAdminEmail,
     action: FormikHelpers<ICheckAdminEmail>,
   ) => {
-    try {
-      const { result, ok } = await checkAdminEmail(data);
-      if (ok) {
-        toast.success(
-          'An Email has been sent to you. Please check and complete the process.',
-        );
-        action.resetForm();
-        router.push('/admin/login');
-        return;
-      }
-      toast.error(result.message);
-    } catch (error) {
-      console.log(error);
+    const { result, ok } = await checkAdminEmail(data);
+    if (ok) {
+      toast.success(result.message);
+      action.resetForm();
+      router.push('/admin/login');
+      return;
     }
+    toast.error(result.message);
   };
 
   const onResetAdminPassword = async (
     data: IResetAdmin,
     action: FormikHelpers<IResetAdmin>,
   ) => {
-    try {
-      const resetToken = Array.isArray(params?.token)
-        ? params.token[0]
-        : params?.token;
-      const { result, ok } = await resetAdminPassword(data, resetToken);
-      if (ok) {
-        toast.success(
-          'Reset password successful. Please login with your new password.',
-        );
-        action.resetForm();
-        router.push('/');
-        return;
-      }
-      toast.error(result.message);
-    } catch (error) {
-      console.log(error);
+    const resetToken = Array.isArray(params?.token)
+      ? params.token[0]
+      : params?.token;
+    const { result, ok } = await resetAdminPassword(data, resetToken);
+    if (ok) {
+      toast.success(result.message);
+      action.resetForm();
+      router.push('/');
+      return;
     }
+    toast.error(result.message);
   };
 
   const onChangingAdminProfile = async (data: IChangeAdminProfile) => {
-    try {
-      const { result, ok } = await changeAdminProfile(data, adminToken);
-
-      if (ok) {
-        toast.success('Profile updated');
-        dispatch(setAdminProfile(result.updatedadmin));
-        return;
-      }
-    } catch (error) {
-      console.log(error);
+    const { result, ok } = await changeAdminProfile(data, adminToken);
+    if (ok) {
+      toast.success(result.message);
+      dispatch(setAdminProfile(result.updatedAdmin));
+      return;
     }
+    toast.error(result.message);
   };
 
   const onChangingAdminEmail = async (data: IChangeAdminEmail) => {
-    try {
-      const { result, ok } = await changeAdminEmail(data, adminToken);
-      if (ok) {
-        toast.success('Email updated');
-        dispatch(clearAdminProfile());
-        setAdminToken('');
-        router.push('/');
-        return;
-      }
-    } catch (error) {
-      console.log(error);
+    const { result, ok } = await changeAdminEmail(data, adminToken);
+    if (ok) {
+      toast.success(result.message);
+      dispatch(clearAdminProfile());
+      setAdminToken('');
+      router.push('/');
+      return;
     }
+    toast.error(result.message);
   };
 
   const onChangingAdminPassword = async (
     data: IChangeAdminPassword,
     action: FormikHelpers<IChangeAdminPassword>,
   ) => {
-    try {
-      const { result, ok } = await changeAdminPassword(data, adminToken);
-      if (ok) {
-        toast.success('Password updated');
-        action.resetForm();
-        setAdminToken('');
-        dispatch(clearAdminProfile());
-        router.push('/');
-        return;
-      }
-    } catch (error) {
-      console.log(error);
+    const { result, ok } = await changeAdminPassword(data, adminToken);
+    if (ok) {
+      toast.success(result.message);
+      action.resetForm();
+      setAdminToken('');
+      dispatch(clearAdminProfile());
+      router.push('/');
+      return;
     }
+    toast.error(result.message);
   };
 
   const onChangingCompanyLogo = async (formData: FormData) => {
-    try {
-      const { result, ok } = await changeCompanyLogo(formData, adminToken);
-      if (ok) {
-        toast.success('Company Logo updated');
-        dispatch(setAdminProfile(result.updatedAdmin));
-        router.push('/admin');
-        return;
-      }
-    } catch (error) {
-      console.error(error);
+    const { result, ok } = await changeCompanyLogo(formData, adminToken);
+    if (ok) {
+      toast.success(result.message);
+      dispatch(setAdminProfile(result.updatedAdmin));
+      router.push('/');
+      return;
     }
+    toast.error(result.message);
   };
 
   return (
@@ -415,11 +362,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       value={{
         token,
         onLogin,
-        onVerified,
-        verified,
         onLogout,
         onCheckEmail,
         onResetPassword,
+        onVerified,
+        verified,
         onChangingProfile,
         onChangingEmail,
         onChangingPassword,

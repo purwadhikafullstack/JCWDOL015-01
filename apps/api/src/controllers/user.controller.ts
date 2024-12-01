@@ -2,7 +2,11 @@ import prisma from '@/prisma';
 import { Request, Response } from 'express';
 import { compare, genSalt, hash } from 'bcrypt';
 import { sign, verify } from 'jsonwebtoken';
-import { sendMailBlockedAccount, sendMailChangeEmail, sendMailUser } from '@/helper/nodemailer';
+import {
+  sendMailBlockedAccount,
+  sendMailChangeEmail,
+  sendMailUser,
+} from '@/helper/nodemailer';
 
 export class UserController {
   async register(req: Request, res: Response) {
@@ -86,6 +90,7 @@ export class UserController {
             include: { job: true },
           },
           notifications: true,
+          savedJobs: true,
         },
       });
 
@@ -112,20 +117,11 @@ export class UserController {
         return res.status(400).send({
           status: 'error',
           message: 'Multiple failed login attempts. Account is blocked',
+          isBlocked: true,
         });
       }
 
       if (!user) throw new Error('Account not found');
-
-      if (!user.isVerified) {
-        sendMailUser(user.id, user.email);
-
-        return res.status(400).send({
-          status: 'error',
-          message:
-            'Account not verified. A new verification email has been sent',
-        });
-      }
 
       if (!user.password) throw new Error('Password not found');
       const isMatch = await compare(password, user.password);
@@ -134,7 +130,7 @@ export class UserController {
         if (auth) {
           await prisma.auth.update({
             where: { email },
-            data: { loginAttempts: 1, lastLogin: new Date() },
+            data: { loginAttempts: { increment: 1 }, lastLogin: new Date() },
           });
         }
 
@@ -170,7 +166,8 @@ export class UserController {
         where: { email },
       });
 
-      if(user && !user.isBlocked) throw new Error('Account is fine, this is a test error');
+      if (user && !user.isBlocked)
+        throw new Error('Account is fine, this is a test error');
 
       if (!user) {
         return res.status(400).send({
@@ -184,9 +181,7 @@ export class UserController {
           message: 'Account found, email sent',
           data: user,
         });
-      } 
-
-      
+      }
     } catch (error) {
       return res.status(400).send({
         status: 'error',
@@ -231,7 +226,7 @@ export class UserController {
       await prisma.auth.update({
         where: { email: email },
         data: { loginAttempts: 0 },
-      })
+      });
 
       return res.status(200).send({
         status: 'success',
@@ -240,31 +235,33 @@ export class UserController {
     } catch (error) {
       return res.status(400).send({
         status: 'error',
-        message: 'Password reset failed',
-        error: error instanceof Error ? error.message : String(error),
+        message: error instanceof Error ? error.message : String(error),
       });
     }
   }
 
   async isVerified(req: Request, res: Response) {
     try {
-      const { email } = req.user!;
+      const { email } = req.body;
       const user = await prisma.user.findUnique({
         where: { email },
       });
 
+      if(!user) throw new Error('Account not found');
+
       const isVerified = user?.isVerified;
+
+      if(!isVerified) throw new Error('Account not verified');
 
       return res.status(200).send({
         status: 'success',
         message: 'Check verification successful',
-        isVerified,
+        user,
       });
     } catch (error) {
       return res.status(400).send({
         status: 'error',
-        message: 'Error',
-        error: error instanceof Error ? error.message : String(error),
+        message:   error instanceof Error ? error.message : String(error),
       });
     }
   }
@@ -280,7 +277,13 @@ export class UserController {
       if (!user) throw new Error('Account not found');
       const updatedUser = await prisma.user.update({
         where: { email },
-        data: { name, gender, address, birthDate: new Date(birthDate), education },
+        data: {
+          name,
+          gender,
+          address,
+          birthDate: new Date(birthDate),
+          education,
+        },
       });
 
       res.status(200).send({
@@ -411,12 +414,8 @@ export class UserController {
         where: { email: req.user?.email },
         data: {
           currentLocation,
-          currentPosition: {
-            create: {
-              latitude,
-              longitude,
-            },
-          },
+          latitude,
+          longitude,
         },
       });
 
@@ -432,4 +431,150 @@ export class UserController {
       });
     }
   }
+
+  async dashboardVerify(req: Request, res: Response) {
+    try {
+      const { email } = req.body;
+      const user = await prisma.user.findUnique({
+        where: { email: email },
+      });
+      if (!user) throw new Error('Account not found');
+      if (user?.isVerified) throw new Error('Account already verified');
+
+      await sendMailUser(user.id, user.email);
+
+      return res.status(200).send({
+        status: 'success',
+        message: 'Verification email sent',
+      });
+    } catch (error) {
+      return res.status(400).send({
+        status: 'error',
+        message: 'Error',
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  async saveJob(req: Request, res: Response) {
+    try {
+      const { userId, jobId } = req.body;
+      const user = await prisma.user.findUnique({
+        where: {
+          id: Number(userId),
+        },
+      });
+      if(!user) throw new Error('User not found');
+
+      const job = await prisma.job.findUnique({
+        where: {
+          id: Number(jobId),
+        },
+      });
+      if (!job) throw new Error('Job not found');
+
+      const savedJob = await prisma.savedJob.create({
+        data: {
+          userId: user.id,
+          jobId: job.id,
+        },
+      });
+
+      return res.status(200).send({
+        status: 'success',
+        message: 'Job saved',
+        savedJob,
+      });
+
+    } catch (error) {
+      return res.status(400).send({
+        status: 'error',
+        message: 'Save job failed',
+        error: error instanceof Error ? error.message : String(error),
+      });
+      
+    }
+  }
+
+  async removeSavedJob(req: Request, res: Response) {
+    try {
+      const { userId, jobId } = req.body;
+      const user = await prisma.user.findUnique({
+        where: {
+          id: Number(userId),
+        },
+      });
+      if(!user) throw new Error('User not found');
+
+      const job = await prisma.job.findUnique({
+        where: {
+          id: Number(jobId),
+        },
+      });
+      if (!job) throw new Error('Job not found');
+
+      const savedJob = await prisma.savedJob.delete({
+        where: {
+          userId_jobId: {
+            userId: user.id,
+            jobId: job.id,
+          },
+        },
+      });
+
+      return res.status(200).send({
+        status: 'success',
+        message: 'Job removed',
+        savedJob,
+      });
+
+    } catch (error) {
+      return res.status(400).send({
+        status: 'error',
+        message: 'Remove job failed',
+        error: error instanceof Error ? error.message : String(error),
+      });
+      
+    }
+    
+  }
+
+  async getSavedJobs(req: Request, res: Response) {
+    try {
+      const { userId } = req.body;
+      const user = await prisma.user.findUnique({
+        where: {
+          id: Number(userId),
+        },
+      });
+      if(!user) throw new Error('User not found');
+
+      const savedJobs = await prisma.savedJob.findMany({
+        where: {
+          userId: user.id,
+        },
+        include: {
+          job: true,
+        },
+      });
+
+      return res.status(200).send({
+        status: 'success',
+        message: 'Saved jobs retrieved',
+        savedJobs,
+      });
+
+    } catch (error) {
+      return res.status(400).send({
+        status: 'error',
+        message: 'Get saved jobs failed',
+        error: error instanceof Error ? error.message : String(error),
+      });
+      
+    }
+  }
 }
+
+
+
+

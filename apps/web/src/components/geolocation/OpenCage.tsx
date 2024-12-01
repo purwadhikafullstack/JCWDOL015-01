@@ -14,8 +14,9 @@ export const reverseGeocoding = async (latitude: number, longitude: number) => {
 
 export const forwardGeocoding = async (query: string) => {
   try {
+    const uri = encodeURIComponent(query);
     const res = await axios.get(
-      `https://api.opencagedata.com/geocode/v1/json?q=${query}&key=${process.env.NEXT_PUBLIC_OPENCAGE_API_KEY}`,
+      `https://api.opencagedata.com/geocode/v1/json?q=${uri}&key=${process.env.NEXT_PUBLIC_OPENCAGE_API_KEY}`,
     );
     const { lat, lng } = res.data.results[0].geometry;
     return { result: { latitude: lat, longitude: lng }, ok: true };

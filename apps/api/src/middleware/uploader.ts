@@ -52,3 +52,56 @@ export const uploader = (filePrefix: string, folderName?: string) => {
     },
   });
 };
+
+export const cvUploader = (filePrefix: string, folderName?: string) => {
+  const defaultDir = path.join(__dirname, '../../public');
+
+  const fileFilter = (
+    req: Request,
+    file: Express.Multer.File,
+    cb: multer.FileFilterCallback,
+  ) => {
+    const allowedMimeTypes = [
+      'application/pdf',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    ];
+
+    if (!allowedMimeTypes.includes(file.mimetype)) {
+      return cb(new Error('Invalid file type. Only PDF and DOCX are allowed.'));
+    }
+    cb(null, true);
+  };
+
+  const storage = multer.diskStorage({
+    destination: (
+      req: Request,
+      file: Express.Multer.File,
+      cb: DestinationCallback,
+    ) => {
+      const destination = folderName
+        ? path.join(defaultDir, folderName)
+        : defaultDir;
+      cb(null, destination);
+    },
+
+    filename: (
+      req: Request,
+      file: Express.Multer.File,
+      cb: FileNameCallback,
+    ) => {
+      const originalNameParts = file.originalname.split('.');
+      const fileExtension = originalNameParts[originalNameParts.length - 1];
+
+      const newFileName = filePrefix + Date.now() + '.' + fileExtension;
+      cb(null, newFileName);
+    },
+  });
+
+  return multer({
+    storage: storage,
+    fileFilter: fileFilter,
+    limits: {
+      fileSize: 5 * 1024 * 1024,
+    },
+  });
+};

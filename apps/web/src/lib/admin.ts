@@ -1,4 +1,12 @@
-import { IChangeAdminEmail, IChangeAdminPassword, IChangeAdminProfile, ICheckAdminEmail, ILoginAdmin, IRegAdmin, IResetAdmin } from '@/types/admin';
+import {
+  IChangeAdminEmail,
+  IChangeAdminPassword,
+  IChangeAdminProfile,
+  ICheckAdminEmail,
+  ILoginAdmin,
+  IRegAdmin,
+  IResetAdmin,
+} from '@/types/admin';
 import axios from 'axios';
 
 const link = process.env.NEXT_PUBLIC_API_URL;
@@ -12,8 +20,9 @@ export const registerAdmin = async (data: IRegAdmin) => {
     });
 
     return { result: res.data, ok: true };
-  } catch (error: any) {
-    return { result: error.response?.data || 'Connection error', ok: false };
+  } catch (error) {
+    const err = error as any;
+    return { result: err.response?.data || 'Connection error', ok: false };
   }
 };
 
@@ -25,8 +34,9 @@ export const loginAdmin = async (data: ILoginAdmin) => {
       },
     });
     return { result: res.data, ok: true };
-  } catch (error: any) {
-    return { result: error.response?.data || 'Connection error', ok: false };
+  } catch (error) {
+    const err = error as any;
+    return { result: err.response?.data || 'Connection error', ok: false };
   }
 };
 
@@ -66,7 +76,10 @@ export const resetAdminPassword = async (data: IResetAdmin, token: string) => {
   }
 };
 
-export const changeAdminProfile = async (data: IChangeAdminProfile, token: string) => {
+export const changeAdminProfile = async (
+  data: IChangeAdminProfile,
+  token: string,
+) => {
   try {
     const res = await axios.post(`${link}/admin/update-profile`, data, {
       headers: {
@@ -81,7 +94,10 @@ export const changeAdminProfile = async (data: IChangeAdminProfile, token: strin
   }
 };
 
-export const changeAdminPassword = async (data: IChangeAdminPassword, token: string) => {
+export const changeAdminPassword = async (
+  data: IChangeAdminPassword,
+  token: string,
+) => {
   try {
     const res = await axios.post(`${link}/admin/change-password`, data, {
       headers: {
@@ -96,7 +112,10 @@ export const changeAdminPassword = async (data: IChangeAdminPassword, token: str
   }
 };
 
-export const changeAdminEmail = async (data: IChangeAdminEmail, token: string) => {
+export const changeAdminEmail = async (
+  data: IChangeAdminEmail,
+  token: string,
+) => {
   try {
     const res = await axios.post(`${link}/admin/change-email`, data, {
       headers: {
@@ -111,18 +130,18 @@ export const changeAdminEmail = async (data: IChangeAdminEmail, token: string) =
   }
 };
 
-export const changeCompanyLogo = async (
-  formData: FormData,
-  token: string,
-) => {
+export const changeCompanyLogo = async (formData: FormData, token: string) => {
   try {
-  
-    const res = await axios.post(`${link}/admin/change-company-logo`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data', // Ensure correct content type for file uploads
-        Authorization: `Bearer ${token}`,
+    const res = await axios.post(
+      `${link}/admin/change-company-logo`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data', // Ensure correct content type for file uploads
+          Authorization: `Bearer ${token}`,
+        },
       },
-    });
+    );
     return { result: res.data, ok: true };
   } catch (error) {
     const err = error as any;
