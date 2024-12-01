@@ -11,7 +11,7 @@ const JobsDashboard = () => {
     title: '',
     location: '',
     tags: '',
-    remoteOption: false,
+    remote_option: false,
   });
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -128,8 +128,8 @@ const JobsDashboard = () => {
         <div className="w-full sm:w-1/2 lg:w-1/4 flex items-center">
           <input
             type="checkbox"
-            name="remoteOption"
-            checked={filters.remoteOption}
+            name="remote_option"
+            checked={filters.remote_option}
             onChange={handleFilterChange}
             className="mr-2"
           />
@@ -159,7 +159,7 @@ const JobsDashboard = () => {
                 <strong>Salary:</strong> ${job.salary}
               </p>
               <p className="text-gray-800 mb-4">
-                <strong>Remote:</strong> {job.remoteOption ? 'Yes' : 'No'}
+                <strong>Remote:</strong> {job.remote_option ? 'Yes' : 'No'}
               </p>
               <div className="flex justify-between mt-4">
                 <button onClick={() => handleApplyClick(job.id)} className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none">

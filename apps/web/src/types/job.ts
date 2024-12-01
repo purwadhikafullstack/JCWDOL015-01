@@ -1,7 +1,7 @@
 export interface IFilters {
   title?: string;
   location: string;
-  remoteOption: boolean;
+  remote_option: boolean;
   tags: string;
 }
 
@@ -11,5 +11,5 @@ export interface IJob {
   description: string;
   location: string;
   salary: number;
-  remoteOption: boolean;
+  remote_option: boolean;
 }
