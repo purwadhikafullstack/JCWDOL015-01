@@ -5,7 +5,7 @@ const link = process.env.NEXT_PUBLIC_API_URL;
 
 export const registerAdmin = async (data: IRegAdmin) => {
   try {
-    const res = await axios.post(`${link}admin/`, data, {
+    const res = await axios.post(`${link}/admin/`, data, {
       headers: {
         'Content-Type': 'application/json',
       },
