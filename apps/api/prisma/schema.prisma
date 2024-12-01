@@ -10,6 +10,23 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Job {
+  id           Int      @id @default(autoincrement())
+  adminId      Int
+  title        String
+  description  String
+  location     String
+  salary       Float?
+  createdAt    DateTime @default(now())
+  expiryDate   DateTime
+  tags         String?
+  remoteOption Boolean
+
+  admin        Admin         @relation(fields: [adminId], references: [id])
+  applications Application[]
+  savedBy      SavedJob[]
+}
+
 model User {
   id                  Int               @id @default(autoincrement())
   password            String?
@@ -20,7 +37,8 @@ model User {
   education           String?
   address             String?
   currentLocation     String?
-  currentPosition     CurrentPosition?
+  latitude            Float?
+  longitude           Float?
   profilePicture      String?
   isVerified          Boolean           @default(false)
   isBlocked           Boolean           @default(false)
@@ -28,17 +46,21 @@ model User {
   subscriptionEndDate DateTime?
   subscriptions       Subscription[]
   applications        Application[]
+  savedJobs           SavedJob[]
   notifications       Notification[]
   paymentHistories    PaymentHistory[]
   auth                Auth?
 }
 
-model CurrentPosition {
-  id        Int   @id @default(autoincrement())
-  latitude  Float
-  longitude Float
-  userId    Int   @unique
-  user      User  @relation(fields: [userId], references: [id])
+model SavedJob {
+  userId  Int
+  jobId   Int
+  savedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  job  Job  @relation(fields: [jobId], references: [id])
+
+  @@id([userId, jobId])
 }
 
 model Admin {
@@ -91,30 +113,13 @@ model Subscription {
   user User @relation(fields: [userId], references: [id])
 }
 
-model Job {
-  id           Int      @id @default(autoincrement())
-  adminId      Int
-  title        String
-  description  String
-  location     String
-  salary       Float?
-  createdAt    DateTime @default(now())
-  expiryDate   DateTime
-  tags         String?
-  remoteOption Boolean
-
-  admin        Admin         @relation(fields: [adminId], references: [id])
-  applications Application[]
-}
-
 model Application {
   id             Int                @id @default(autoincrement())
   jobId          Int
   userId         Int
   status         ApplicationStatus? @default(PENDING)
-  resume         String
+  resume         String             @db.LongText
   appliedAt      DateTime           @default(now())
-  coverLetter    String?
   expectedSalary Float?
 
   interviewSchedule InterviewSchedule?

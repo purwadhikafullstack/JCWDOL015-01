@@ -12,13 +12,9 @@ export class JobRouter {
   }
 
   private initializeRoutes(): void {
-    this.router.get('/', this.jobController.getAllJobs);
-    this.router.get('/locations', this.jobController.getJobLocations);
-    this.router.get('/geolocation', this.jobController.getJobsByGeolocation);
-    this.router.get('/filter', this.jobController.getJobsByFilter);
-    this.router.post('/', this.jobController.addJob);
-    this.router.post('/:id', this.jobController.updateJob);
-    this.router.delete('/:id', this.jobController.deleteJob);
+    this.router.get('/', this.jobController.getJobs);
+    this.router.post('/:jobId/apply', this.jobController.jobApplication);
+    this.router.get('/:jobId/application', this.jobController.displayJob);
   }
 
   getRouter(): Router {

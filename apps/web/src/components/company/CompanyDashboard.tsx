@@ -2,6 +2,12 @@
 import { useState, useEffect } from 'react';
 import { getCompanyInfo } from '@/lib/company';
 import Image from 'next/image';
+import { jobApplication } from '@/lib/job';
+import { useAuth } from '../authContext/Provider';
+import { toast } from 'react-toastify';
+import { useRouter } from 'next/navigation';
+import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
+import { savedJobs, removeSavedJob, getSavedJobs } from '@/lib/user';
 
 const CompanyDashboard = () => {
   const [companyData, setCompanyData] = useState<any>(null);
@@ -10,6 +16,11 @@ const CompanyDashboard = () => {
   const [selectedCompany, setSelectedCompany] = useState<any>(null);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [savedJobIds, setSavedJobIds] = useState<Set<string>>(new Set());
+  const { onVerified, verified } = useAuth();
+  const profile = useAppSelector((state) => state.user.profile);
+  const dispatch = useAppDispatch();
+  const router = useRouter();
 
   useEffect(() => {
     const fetchCompanyData = async () => {
@@ -25,6 +36,19 @@ const CompanyDashboard = () => {
 
     fetchCompanyData();
   }, []);
+
+  useEffect(() => {
+    if (profile?.id) {
+      const fetchSavedJobs = async () => {
+        const { result, ok } = await getSavedJobs(profile.id);
+        if (ok) {
+          setSavedJobIds(new Set(result.savedJobs.map((job: any) => job.id)));
+        }
+      };
+
+      fetchSavedJobs();
+    }
+  }, [profile]);
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
@@ -59,6 +83,60 @@ const CompanyDashboard = () => {
         company.companyName.toLowerCase().includes(searchQuery.toLowerCase()),
       )
     : [];
+
+  const handleApply = async (jobId: string) => {
+    onVerified();
+    if (!verified) {
+      return router.push('/user/login');
+    }
+
+    if (!profile) {
+      return;
+    }
+
+    const { result, ok } = await jobApplication(profile.id, jobId);
+    if (ok) {
+      toast.success('Redirecting to job application page...');
+      setTimeout(() => {
+        router.push(`/application/${jobId}`);
+      }, 3000);
+    } else {
+      toast.error(result.message);
+    }
+  };
+
+  const handleSavedJobs = async (jobId: string) => {
+    onVerified();
+    if (!verified) {
+      return router.push('/user/login');
+    }
+
+    if (!profile) {
+      return;
+    }
+
+    if (savedJobIds.has(jobId)) {
+      const { result, ok } = await removeSavedJob(profile.id, Number(jobId));
+      if (ok) {
+        setSavedJobIds((prev) => {
+          const updated = new Set(prev);
+          updated.delete(jobId);
+          return updated;
+        });
+        toast.success('Job removed from saved jobs');
+      } else {
+        toast.error(result.message);
+      }
+    } else {
+      const { result, ok } = await savedJobs(profile.id, Number(jobId));
+      if (ok) {
+        setSavedJobIds((prev) => new Set(prev).add(jobId));
+        toast.success('Job saved successfully');
+      } else {
+        toast.error(result.message);
+      }
+    }
+  };
 
   return (
     <div className="container mx-auto p-4 w-full items-center text-center mt-5">
@@ -161,11 +239,21 @@ const CompanyDashboard = () => {
                       <strong>Remote:</strong> {job.remoteOption ? 'Yes' : 'No'}
                     </p>
                     <div className="flex space-x-4 mt-4">
-                      <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                      <button
+                        onClick={() => handleApply(job.id)}
+                        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                      >
                         Apply
                       </button>
-                      <button className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">
-                        Save
+                      <button
+                        onClick={() => handleSavedJobs(job.id)}
+                        className={`${
+                          savedJobIds.has(job.id)
+                            ? 'bg-green-500 hover:bg-green-600'
+                            : 'bg-gray-300 hover:bg-gray-400'
+                        } px-4 py-2 rounded`}
+                      >
+                        {savedJobIds.has(job.id) ? 'Saved' : 'Save'}
                       </button>
                     </div>
                   </div>

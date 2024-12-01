@@ -1,4 +1,5 @@
 import { ApplicationController } from '@/controllers/application.controller';
+import { cvUploader } from '@/middleware/uploader';
 import { Router } from 'express';
 
 export class ApplicationRouter {
@@ -12,8 +13,11 @@ export class ApplicationRouter {
   }
 
   private initializeRoutes(): void {
-    this.router.post('/apply', this.applicationController.applyJob);
-    this.router.get('/details', this.applicationController.getJobDetail);
+    this.router.post(
+      '/submission',
+      cvUploader('resume', '/resume').single('resume'),
+      this.applicationController.submission,
+    );
   }
 
   getRouter(): Router {

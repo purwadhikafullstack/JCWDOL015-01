@@ -67,7 +67,7 @@ export const sendMailAdmin = async (adminEmail: string) => {
 export const sendMailBlockedAccount = async (userEmail: string) => {
   try {
     const payload = { email: userEmail };
-    const token = sign(payload, process.env.JWT!, { expiresIn: '10m' });
+    const token = sign(payload, process.env.JWT!, { expiresIn: '1h' });
 
     const templatePath = path.join(
       __dirname,
@@ -94,7 +94,7 @@ export const sendMailBlockedAccount = async (userEmail: string) => {
 export const sendMailChangeEmail = async (userEmail: string) => {
   try {
     const payload = { email: userEmail };
-    const token = sign(payload, process.env.JWT!, { expiresIn: '10m' });
+    const token = sign(payload, process.env.JWT!, { expiresIn: '1h' });
 
     const templatePath = path.join(
       __dirname,

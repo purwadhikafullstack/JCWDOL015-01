@@ -9,6 +9,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useAuth } from '../authContext/Provider';
 import { toast } from 'react-toastify';
+import { dashboardVerify } from '@/lib/user';
 
 export default function UserDashboardSchema() {
   const dispatch = useDispatch();
@@ -19,7 +20,6 @@ export default function UserDashboardSchema() {
   const [activeTab, setActiveTab] = useState('personal');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
-
 
   if (!profile) {
     return (
@@ -72,13 +72,25 @@ export default function UserDashboardSchema() {
     }
   };
 
+  const handleVerifyEmail = async () => {
+    if (!profile.isVerified) {
+      const { result, ok } = await dashboardVerify(profile.email);
+      if (ok) {
+        toast.success('Verification email sent successfully');
+      } else {
+        toast.error(result.message);
+      }
+    } else {
+      toast.error('Email already verified');
+    }
+  };
+
   const uploadProfilePic = async () => {
     const formData = new FormData();
     if (file) {
       formData.append('profilePicture', file);
     }
     onChangingProfilePicture(formData);
-
   };
 
   const renderPersonalInformation = () => (
@@ -211,9 +223,7 @@ export default function UserDashboardSchema() {
                 <span className="font-medium w-32 text-gray-700">
                   Birth Date:
                 </span>
-                <span className="text-gray-500">
-                  {formattedBirthDate}
-                </span>
+                <span className="text-gray-500">{formattedBirthDate}</span>
               </div>
               <div className="flex items-center space-x-4">
                 <span className="font-medium w-32 text-gray-700">Gender:</span>
@@ -263,6 +273,12 @@ export default function UserDashboardSchema() {
             className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400"
           >
             Change Profile Picture
+          </button>
+          <button
+            onClick={handleVerifyEmail}
+            className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400"
+          >
+            Verify Email
           </button>
         </div>
 

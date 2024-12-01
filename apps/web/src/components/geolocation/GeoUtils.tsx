@@ -3,6 +3,7 @@ import { reverseGeocoding } from './OpenCage';
 import { toast } from 'react-toastify';
 import { useAuth } from '../authContext/Provider';
 import { saveLocation } from '@/lib/user';
+import { createCookie, fetchCookie, deleteCookie } from '@/lib/cookie';
 
 export const useGeolocation = () => {
   const { token } = useAuth();
@@ -10,51 +11,88 @@ export const useGeolocation = () => {
     latitude: number;
     longitude: number;
     currentLocation?: string;
-  } | null>(() => {
-    const storedLocation = localStorage.getItem('userLocation');
-    return storedLocation ? JSON.parse(storedLocation) : null;
-  });
-  const permissionAsked = useRef(false);
+  } | null>(null);
+  const consentAsked = useRef(false); // Track if the consent has been asked
 
   useEffect(() => {
-    const askForPermission = async () => {
-      if (permissionAsked.current) return;
-      permissionAsked.current = true;
+    const getLocation = async () => {
+      // Retrieve existing location from cookie
+      const existingLocation = await fetchCookie('userLocation');
+      if (existingLocation && !token) {
+        setLocation(JSON.parse(existingLocation));
+        return;
+      }
 
-      const userConsent = window.confirm(
-        'Do you allow us to access and record your location? This will help us provide better services.',
-      );
+      // Ask for permission only if token exists and consent hasn't been asked yet
+      const askForPermission = async () => {
+        if (consentAsked.current) return;
+        consentAsked.current = true; // Mark consent as asked
 
-      if (userConsent && 'geolocation' in navigator) {
-        const options = {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 0,
-        };
-
-        navigator.geolocation.getCurrentPosition(
-          ({ coords }) => {
-            const { latitude, longitude } = coords;
-            const newLocation = { latitude, longitude };
-            setLocation(newLocation);
-            localStorage.setItem('userLocation', JSON.stringify(newLocation));
-          },
-          (error) => {},
-          options,
+        const userConsent = window.confirm(
+          'Do you allow us to access and record your location? This will help us provide better services.',
         );
-      } else if (!userConsent) {
-        toast.warn(
-          'You have denied location access. Some features may not work as expected.',
-        );
+
+        if (userConsent && 'geolocation' in navigator) {
+          navigator.geolocation.getCurrentPosition(
+            async ({ coords }) => {
+              const { latitude, longitude } = coords;
+              const newLocation = { latitude, longitude };
+              setLocation(newLocation);
+
+              // Save location in cookies
+              await createCookie('userLocation', JSON.stringify(newLocation));
+            },
+            (error) => {
+              console.error('Error getting location:', error);
+              toast.error('Unable to fetch location. Please try again later.');
+            },
+            {
+              enableHighAccuracy: true,
+              timeout: 10000,
+              maximumAge: 0,
+            }
+          );
+        } else if (!userConsent) {
+          toast.warn(
+            'You have denied location access. Some features may not work as expected.',
+          );
+        }
+      };
+
+      if (token) {
+        // If logged in, clear existing location and ask again
+        await deleteCookie('userLocation');
+        askForPermission();
+      } else if (!existingLocation) {
+        // Automatically fetch location for unauthenticated users
+        if ('geolocation' in navigator) {
+          navigator.geolocation.getCurrentPosition(
+            async ({ coords }) => {
+              const { latitude, longitude } = coords;
+              const newLocation = { latitude, longitude };
+              setLocation(newLocation);
+
+              // Save location in cookies
+              await createCookie('userLocation', JSON.stringify(newLocation));
+            },
+            (error) => {
+              console.error('Error getting location:', error);
+            },
+            {
+              enableHighAccuracy: true,
+              timeout: 10000,
+              maximumAge: 0,
+            }
+          );
+        }
       }
     };
 
-    if (!location) {
-      askForPermission();
-    }
-  }, [location]);
+    getLocation();
+  }, [token]);
 
   useEffect(() => {
+    // Handle reverse geocoding if location is set
     if (location && !location.currentLocation) {
       (async () => {
         try {
@@ -66,7 +104,9 @@ export const useGeolocation = () => {
           if (ok) {
             const updatedLocation = { ...location, currentLocation: result };
             setLocation(updatedLocation);
-            localStorage.setItem(
+
+            // Update the cookie with the new location data
+            await createCookie(
               'userLocation',
               JSON.stringify(updatedLocation),
             );
@@ -78,7 +118,7 @@ export const useGeolocation = () => {
             toast.success(`Location: ${result}`);
           }
         } catch (error) {
-          console.error('Error during geocoding', error);
+          console.error('Error during reverse geocoding:', error);
         }
       })();
     }

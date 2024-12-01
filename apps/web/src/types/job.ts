@@ -12,4 +12,9 @@ export interface IJob {
   location: string;
   salary: number;
   remoteOption: boolean;
+  tags: string;
+  admin:{
+    companyName:string;
+    companyLogo:string;
+  }
 }

@@ -17,8 +17,7 @@ export const verifyToken = async (
     next();
   } catch (error) {
     res.status(401).send({
-      message: 'Unauthorized',
-      error: error instanceof Error ? error.message : String(error),
+      message: "Unauthorized, Token not found"
     });
   }
 };
