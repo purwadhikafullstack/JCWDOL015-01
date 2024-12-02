@@ -12,7 +12,7 @@ export const getAllSubscriptions = async (req: Request, res: Response) => {
     } catch (error) {
         return res.status(500).json({ message: 'Error fetching subscriptions', error });
     }
-};
+}
 
 export const purchaseSubscription = async (req: Request, res: Response) => {
     console.log('Request Body:', req.body)

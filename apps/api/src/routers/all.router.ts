@@ -7,6 +7,7 @@ import { checkSubscription } from "@/middlewares/checkSubs";
 import { verifyDeveloperRole } from "@/middlewares/verifyDevRole";
 import { verifyUserStatus } from "@/middlewares/verifyUserStatus";
 import { Router } from "express";
+import { shareJobs } from "@/controllers/share.controller";
 
 const router = Router()
 
@@ -18,6 +19,7 @@ router.get('/generate-cv', checkSubscription, generateCV)
 router.post('/reviews/anonymous', verifyUserStatus, addAnonymousReview);
 router.post('/assessments/complete', verifyUserStatus, completeAssessment)
 router.get('/assessments/user/:userId', getUserAssessments)
+router.get('/shareJob', verifyUserStatus, shareJobs)
 
 /** Developer Routes */
 router.put('/subscriptions/approve', verifyDeveloperRole, approvePayment)

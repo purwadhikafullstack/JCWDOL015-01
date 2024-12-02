@@ -28,7 +28,7 @@ const SubscriptionPage: React.FC = () => {
 
     const handlePurchase = async (type: string) => {
         try {
-            const paymentMethod = 'ONLINE'; // Mocking payment method
+            const paymentMethod = 'MANUAL'; // Mocking payment method
             await purchaseSubscription(userId, type, paymentMethod);
             alert('Subscription purchased successfully!');
             window.location.reload(); // Refresh to update active subscription

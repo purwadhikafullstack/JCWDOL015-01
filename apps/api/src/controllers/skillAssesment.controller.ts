@@ -58,14 +58,11 @@ export const getUserAssessments = async (req: Request, res: Response) => {
             return res.status(404).json({ message: "User not found" });
         }
 
-        // Get the completed assessments
         const completedAssessments = user.UserAssessment.length;
 
-        // Calculate remaining assessments based on subscription type
         const limit = user.subscriptions[0]?.type === SubscriptionType.STANDARD ? 2 : Infinity
         const remainingAssessments = limit - completedAssessments;
 
-        // Get the incomplete assessments
         const completedIds = user.UserAssessment.map((assessment) => assessment.assessmentId);
         const incompleteAssessments = await prisma.skillAssessment.findMany({
             where: {
@@ -88,13 +85,12 @@ export const getUserAssessments = async (req: Request, res: Response) => {
             })),
         }));
 
-        // Send the response with assessments, subscription info, and remaining assessments
         res.status(200).json({
             Assessments: formattedAssessments,
             Subs: {
                 type: user.subscriptions[0]?.type,
                 completedAssessments,
-                remainingAssessments, // Return the calculated remaining assessments
+                remainingAssessments,
             },
         });
     } catch (error) {
@@ -192,4 +188,4 @@ export const completeAssessment = async (req: Request, res: Response) => {
         console.error("Error completing assessment:", error);
         res.status(500).json({ message: "Failed to complete the assessment." })
     }
-};
+}
