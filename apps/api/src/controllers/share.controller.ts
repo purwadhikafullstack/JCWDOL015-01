@@ -25,6 +25,4 @@ export const shareJobs = async (req: Request, res: Response) => {
         res.status(500).send({message: "Error"})
         console.error("Error on Internal Server: ", error)
     }
-
-
 }
